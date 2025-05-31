@@ -1,944 +1,819 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en" class="dark"> <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Red Messenger</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"></script>
+    <title>AI Image Studio (HTML)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-color: #d42a2a;
-            --primary-light: #ffebee;
-            --primary-dark: #9a0007;
-            --text-light: #f5f5f5;
-            --text-dark: #333;
-            --bg-light: #fff;
-            --bg-dark: #f5f5f5;
-            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Roboto', sans-serif;
-        }
-
         body {
-            background-color: var(--bg-dark);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-family: 'Poppins', sans-serif;
         }
-
-        .app-container {
-            width: 100%;
-            max-width: 1200px;
-            height: 90vh;
-            background-color: var(--bg-light);
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-            overflow: hidden;
-            display: flex;
+        /* Custom scrollbar for history (optional) */
+        .history-scrollbar::-webkit-scrollbar {
+            height: 8px;
         }
-
-        /* Sidebar */
-        .sidebar {
-            width: 30%;
-            background-color: var(--bg-light);
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
+        .history-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
         }
-
-        .sidebar-header {
-            padding: 15px;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .history-scrollbar::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
         }
-
-        .sidebar-header h2 {
-            font-size: 1.2rem;
-            font-weight: 500;
+        .dark .history-scrollbar::-webkit-scrollbar-thumb {
+            background: #6b7280; /* dark:gray-500 */
         }
-
-        .sidebar-header-icons {
-            display: flex;
-            gap: 15px;
+        .history-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #374151; /* gray-700 */
         }
-
-        .sidebar-header-icons i {
-            cursor: pointer;
+        .dark .history-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #4b5563; /* dark:gray-600 */
         }
-
-        .search-container {
-            padding: 10px;
-            background-color: var(--bg-dark);
+        /* Ensure icons are sized correctly if not using a library like Lucide directly in HTML */
+        .icon {
+            width: 1.25rem; /* 20px */
+            height: 1.25rem; /* 20px */
+            display: inline-block;
+            vertical-align: middle;
         }
-
-        .search-input {
-            width: 100%;
-            padding: 8px 15px;
-            border-radius: 20px;
-            border: none;
-            outline: none;
-            background-color: var(--bg-light);
+        .icon-sm {
+            width: 1rem; /* 16px */
+            height: 1rem; /* 16px */
         }
-
-        .chats-list {
-            flex: 1;
-            overflow-y: auto;
+         .icon-xs {
+            width: 0.875rem; /* 14px */
+            height: 0.875rem; /* 14px */
         }
-
-        .chat-item {
-            display: flex;
-            padding: 10px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
+        .loader-spin {
+            animation: spin 1s linear infinite;
         }
-
-        .chat-item:hover {
-            background-color: var(--bg-dark);
-        }
-
-        .chat-item.active {
-            background-color: var(--primary-light);
-        }
-
-        .chat-item-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin-right: 10px;
-            overflow: hidden;
-        }
-
-        .chat-item-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .chat-item-info {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .chat-item-info h3 {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 3px;
-        }
-
-        .chat-item-info p {
-            font-size: 0.8rem;
-            color: #666;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .chat-item-time {
-            font-size: 0.7rem;
-            color: #666;
-        }
-
-        /* Chat Area */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .chat-header {
-            padding: 15px;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chat-header-info {
-            display: flex;
-            align-items: center;
-        }
-
-        .chat-header-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin-right: 10px;
-            overflow: hidden;
-        }
-
-        .chat-header-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .chat-header-text h3 {
-            font-size: 1rem;
-            font-weight: 500;
-        }
-
-        .chat-header-text p {
-            font-size: 0.8rem;
-            color: #ffcccc;
-        }
-
-        .chat-header-icons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .chat-header-icons i {
-            cursor: pointer;
-        }
-
-        .chat-messages {
-            flex: 1;
-            padding: 20px;
-            overflow-y: auto;
-            background-color: var(--bg-light);
-            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyMTIsMjEyLDIxMiwwLjEpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIi8+PC9zdmc+');
-        }
-
-        .message {
-            max-width: 70%;
-            margin-bottom: 15px;
-            padding: 10px 15px;
-            border-radius: 18px;
-            position: relative;
-            word-wrap: break-word;
-            box-shadow: var(--shadow);
-        }
-
-        .message.received {
-            background-color: var(--bg-light);
-            border-top-left-radius: 0;
-            align-self: flex-start;
-        }
-
-        .message.sent {
-            background-color: var(--primary-light);
-            border-top-right-radius: 0;
-            align-self: flex-end;
-            margin-left: auto;
-        }
-
-        .message.sent .message-sender {
-            display: none;
-        }
-
-        .message-sender {
-            position: absolute;
-            top: -15px;
-            left: 0;
-            font-size: 0.7rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .message-text {
-            margin-bottom: 5px;
-        }
-
-        .message-image {
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            cursor: pointer;
-        }
-
-        .message-time {
-            font-size: 0.7rem;
-            color: #666;
-            text-align: right;
-        }
-
-        .chat-input-container {
-            padding: 10px;
-            background-color: var(--bg-light);
-            border-top: 1px solid #e0e0e0;
-            display: flex;
-            align-items: center;
-        }
-
-        .chat-input-icons {
-            display: flex;
-            gap: 10px;
-            margin-right: 10px;
-        }
-
-        .chat-input-icons i {
-            cursor: pointer;
-            color: var(--primary-color);
-        }
-
-        .chat-input {
-            flex: 1;
-            padding: 10px 15px;
-            border-radius: 20px;
-            border: 1px solid #e0e0e0;
-            outline: none;
-            resize: none;
-            max-height: 100px;
-        }
-
-        .chat-send-btn {
-            margin-left: 10px;
-            padding: 10px 15px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .chat-send-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        /* Auth Screens */
-        .auth-container {
-            width: 100%;
-            max-width: 400px;
-            padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: var(--shadow);
-        }
-
-        .auth-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .auth-header h1 {
-            color: var(--primary-color);
-            margin-bottom: 10px;
-        }
-
-        .auth-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .auth-input {
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            outline: none;
-            font-size: 1rem;
-        }
-
-        .auth-input:focus {
-            border-color: var(--primary-color);
-        }
-
-        .auth-btn {
-            padding: 12px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .auth-btn:hover {
-            background-color: var(--primary-dark);
-        }
-
-        .auth-switch {
-            text-align: center;
-            margin-top: 20px;
-            color: #666;
-        }
-
-        .auth-switch a {
-            color: var(--primary-color);
-            text-decoration: none;
-            cursor: pointer;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* Modal */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            color: var(--primary-color);
-        }
-
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #666;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .app-container {
-                height: 100vh;
-                border-radius: 0;
-            }
-            
-            .sidebar {
-                width: 100%;
-            }
-            
-            .chat-area {
-                display: none;
-            }
-            
-            .chat-area.active {
-                display: flex;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: 100;
-                background-color: white;
-            }
-            
-            .back-button {
-                display: block !important;
-                margin-right: 10px;
-            }
-        }
-
-        .back-button {
-            display: none;
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+        <symbol id="icon-refresh-cw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+        <symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+        <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
+        <symbol id="icon-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
+        <symbol id="icon-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+        <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
+        <symbol id="icon-edit-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
+    </svg>
 </head>
-<body>
-    <!-- Authentication Screens -->
-    <div id="auth-screen" class="auth-container">
-        <div class="auth-header">
-            <h1>Red Messenger</h1>
-            <p>Connect with your friends</p>
-        </div>
-        <div id="login-form" class="auth-form">
-            <input type="email" id="login-email" class="auth-input" placeholder="Email" required>
-            <input type="password" id="login-password" class="auth-input" placeholder="Password" required>
-            <button id="login-btn" class="auth-btn">Log In</button>
-            <div class="auth-switch">
-                Don't have an account? <a id="switch-to-register">Sign Up</a>
-            </div>
-        </div>
-        <div id="register-form" class="auth-form hidden">
-            <input type="text" id="register-name" class="auth-input" placeholder="Name" required>
-            <input type="email" id="register-email" class="auth-input" placeholder="Email" required>
-            <input type="password" id="register-password" class="auth-input" placeholder="Password" required>
-            <input type="password" id="register-confirm-password" class="auth-input" placeholder="Confirm Password" required>
-            <button id="register-btn" class="auth-btn">Sign Up</button>
-            <div class="auth-switch">
-                Already have an account? <a id="switch-to-login">Log In</a>
-            </div>
-        </div>
-    </div>
+<body class="bg-gray-100 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 text-gray-800 dark:text-gray-100 transition-colors duration-300">
 
-    <!-- Main App -->
-    <div id="app-container" class="app-container hidden">
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <div class="sidebar-header">
-                <h2>Chats</h2>
-                <div class="sidebar-header-icons">
-                    <i class="material-icons">group</i>
-                    <i class="material-icons">more_vert</i>
+    <div class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
+        <div id="app-container" class="w-full max-w-3xl bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-6 md:p-8 transition-colors duration-300">
+            <header class="mb-6 md:mb-8 text-center relative">
+                <div class="absolute top-0 right-0 flex items-center gap-2">
+                    <button id="theme-toggle-button" class="p-2 rounded-full text-slate-700 dark:text-yellow-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" aria-label="Toggle dark mode">
+                        <svg class="icon" id="theme-icon-sun" style="display:none;"><use xlink:href="#icon-sun"></use></svg>
+                        <svg class="icon" id="theme-icon-moon"><use xlink:href="#icon-moon"></use></svg>
+                    </button>
+                    <a href="https://wa.me/923001881920" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full text-white bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors" aria-label="Contact on WhatsApp">
+                        <svg class="icon"><use xlink:href="#icon-message-circle"></use></svg>
+                    </a>
                 </div>
-            </div>
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search messages or users">
-            </div>
-            <div class="chats-list" id="chats-list">
-                <!-- Chat items will be added here dynamically -->
-            </div>
-        </div>
+                
+                <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
+                    AI Image By AKRAM
+                </h1>
+                <p class="mt-2 text-sm md:text-base text-slate-500 dark:text-slate-400">Powered by Gemini</p>
+            </header>
 
-        <!-- Chat Area -->
-        <div class="chat-area" id="chat-area">
-            <div class="chat-header">
-                <div class="chat-header-info">
-                    <i class="material-icons back-button" id="back-button">arrow_back</i>
-                    <div class="chat-header-avatar">
-                        <img id="chat-avatar" src="" alt="">
+            <main>
+                <div class="mb-1">
+                    <label for="prompt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                        Enter your creative prompt:
+                    </label>
+                    <textarea id="prompt" placeholder="e.g., A futuristic cityscape at sunset, synthwave style" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-150 text-gray-800 dark:text-gray-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none" rows="3"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 items-end mb-4">
+                    <div class="mt-2">
+                        <label for="art-style-select" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Select Art Style:</label>
+                        <div class="flex gap-2">
+                            <select id="art-style-select" class="flex-grow p-2 text-xs bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 text-gray-800 dark:text-gray-100">
+                                </select>
+                            <button id="enhance-style-button" class="inline-flex items-center justify-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 rounded-md whitespace-nowrap" title="Enhance prompt with selected style">
+                                <svg class="icon icon-xs"><use xlink:href="#icon-palette"></use></svg> 
+                                <span id="enhance-style-button-text">Enhance Style</span>
+                                <svg id="enhance-style-loader" class="animate-spin h-3 w-3 text-purple-500 dark:text-purple-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                            </button>
+                        </div>
+                        <p id="style-enhance-error" class="text-xs text-red-500 dark:text-red-400 mt-1 hidden"></p>
                     </div>
-                    <div class="chat-header-text">
-                        <h3 id="chat-name">Select a chat</h3>
-                        <p id="chat-status">Online</p>
+                    <div class="mt-2 sm:text-right">
+                        <button id="suggest-prompts-button" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 rounded-md">
+                            <svg class="icon icon-sm"><use xlink:href="#icon-sparkles"></use></svg> 
+                            <span id="suggest-prompts-button-text">Suggest Prompts</span>
+                            <svg id="suggest-prompts-loader" class="animate-spin h-4 w-4 text-sky-500 dark:text-sky-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        </button>
                     </div>
                 </div>
-                <div class="chat-header-icons">
-                    <i class="material-icons">search</i>
-                    <i class="material-icons">more_vert</i>
+
+                <div id="suggestions-container" class="mb-4 p-3 bg-slate-100 dark:bg-slate-700/70 rounded-lg relative hidden">
+                    <button id="close-suggestions-button" class="absolute top-2 right-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Close suggestions">
+                        <svg class="icon icon-sm"><use xlink:href="#icon-x"></use></svg>
+                    </button>
+                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Prompt Suggestions:</h4>
+                    <p id="suggestions-error" class="text-xs text-red-500 dark:text-red-400 hidden"></p>
+                    <p id="suggestions-loader-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">Loading suggestions...</p>
+                    <ul id="suggestions-list" class="space-y-1.5"></ul>
+                    <p id="no-suggestions-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">No suggestions generated. Try different keywords.</p>
                 </div>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <!-- Messages will be added here dynamically -->
-            </div>
-            <div class="chat-input-container">
-                <div class="chat-input-icons">
-                    <i class="material-icons" id="attach-btn">attach_file</i>
-                    <i class="material-icons">insert_emoticon</i>
+                
+                <div id="history-section" class="mb-6 hidden">
+                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Recent Generations:</h4>
+                    <div id="history-items-container" class="history-scrollbar flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                        </div>
                 </div>
-                <textarea class="chat-input" id="message-input" placeholder="Type a message"></textarea>
-                <button class="chat-send-btn" id="send-btn">
-                    <i class="material-icons">send</i>
-                </button>
-            </div>
+
+                <div class="mb-4">
+                    <button id="toggle-advanced-options-button" class="text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">
+                        Show Advanced Options
+                    </button>
+                </div>
+
+                <div id="advanced-options-section" class="mb-6 p-4 bg-slate-100 dark:bg-slate-700/50 rounded-lg space-y-4 hidden">
+                    <div>
+                        <label for="negative-prompt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Negative Prompt (optional):
+                        </label>
+                        <input type="text" id="negative-prompt" placeholder="e.g., blurry, watermark, text, ugly" class="w-full p-2 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all duration-150 text-gray-800 dark:text-gray-100 placeholder-slate-400 dark:placeholder-slate-400">
+                    </div>
+                    <div>
+                        <label for="aspect-ratio-select" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                            Aspect Ratio:
+                        </label>
+                        <select id="aspect-ratio-select" class="w-full p-2 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all duration-150 text-gray-800 dark:text-gray-100">
+                            </select>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 mb-6">
+                    <button id="generate-image-button" class="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
+                        <svg id="generate-image-loader" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span id="generate-image-button-text">Generate Image</span>
+                    </button>
+                    <button id="regenerate-image-button" class="sm:w-auto bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 font-medium py-3 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <svg class="icon icon-sm"><use xlink:href="#icon-refresh-cw"></use></svg> Regenerate
+                    </button>
+                </div>
+
+                <div id="main-error-message" class="my-4 p-3 bg-red-100 dark:bg-red-500/20 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg flex items-center gap-2 hidden">
+                    <svg class="icon"><use xlink:href="#icon-alert-triangle"></use></svg>
+                    <span id="main-error-text"></span>
+                </div>
+
+                <div id="image-display-area" class="mt-6 bg-slate-100 dark:bg-slate-700/50 p-4 rounded-lg min-h-[256px] md:min-h-[384px] flex flex-col items-center justify-center">
+                    <div id="image-placeholder" class="text-center text-slate-400 dark:text-slate-500">
+                        <svg class="icon mx-auto mb-2 opacity-50" style="width: 64px; height: 64px;"><use xlink:href="#icon-image"></use></svg>
+                        <p>Your generated image will appear here.</p>
+                    </div>
+                    <div id="image-loading-placeholder" class="text-center text-slate-500 dark:text-slate-400 hidden">
+                        <svg class="animate-spin mx-auto h-10 w-10 text-sky-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <p>Conjuring pixels... please wait.</p>
+                    </div>
+                    <div id="generated-image-container" class="relative group w-full flex-col items-center hidden">
+                        <img id="generated-image" src="" alt="Generated AI art" class="max-w-full max-h-[60vh] rounded-md shadow-xl object-contain"/>
+                        <button id="download-image-button" class="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" title="Download Image">
+                            <svg class="icon"><use xlink:href="#icon-download"></use></svg>
+                        </button>
+                        
+                        <div class="mt-4 w-full max-w-md text-center space-y-3">
+                            <div>
+                                <button id="generate-description-button" class="inline-flex items-center gap-1.5 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-md">
+                                    <svg class="icon icon-sm"><use xlink:href="#icon-edit-3"></use></svg> 
+                                    <span id="generate-description-button-text">Generate Description</span>
+                                    <svg id="generate-description-loader" class="animate-spin h-4 w-4 text-sky-500 dark:text-sky-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </button>
+                                <p id="description-error" class="text-xs text-red-500 dark:text-red-400 mt-1 hidden"></p>
+                                <p id="description-loader-text" class="text-xs text-slate-500 dark:text-slate-400 mt-1 hidden">Loading description...</p>
+                                <p id="generated-description-text" class="text-sm text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-600/50 p-3 rounded-md mt-2 hidden"></p>
+                            </div>
+                             <div>
+                                <button id="suggest-titles-button" class="inline-flex items-center gap-1.5 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-md">
+                                    <svg class="icon icon-sm"><use xlink:href="#icon-sparkles"></use></svg> 
+                                    <span id="suggest-titles-button-text">Suggest Titles</span>
+                                    <svg id="suggest-titles-loader" class="animate-spin h-4 w-4 text-teal-500 dark:text-teal-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                </button>
+                                <div id="titles-container" class="mt-2 p-3 bg-white/80 dark:bg-slate-600/50 rounded-lg relative hidden">
+                                    <h5 class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Suggested Titles:</h5>
+                                    <p id="titles-error" class="text-xs text-red-500 dark:text-red-400 hidden"></p>
+                                    <p id="titles-loader-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">Loading titles...</p>
+                                    <ul id="titles-list" class="space-y-1 text-left"></ul>
+                                    <p id="no-titles-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">No titles suggested.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="mt-8 text-center">
+                <p class="text-xs text-slate-400 dark:text-slate-500">
+                    Ensure your prompts adhere to safety guidelines. Results may vary.
+                </p>
+                <div class="mt-2 flex justify-center gap-4">
+                    <a href="https://wa.me/923001881920" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300">
+                        <svg class="icon icon-sm"><use xlink:href="#icon-message-circle"></use></svg> Contact Support
+                    </a>
+                </div>
+            </footer>
         </div>
     </div>
 
-    <!-- Image Upload Modal -->
-    <div id="image-modal" class="modal hidden">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Upload Image</h2>
-                <button class="modal-close" id="close-image-modal">&times;</button>
-            </div>
-            <input type="file" id="image-upload" accept="image/*">
-            <div id="image-preview-container" style="margin-top: 20px; display: none;">
-                <img id="image-preview" style="max-width: 100%; max-height: 300px;">
-                <button id="send-image-btn" class="auth-btn" style="margin-top: 10px;">Send Image</button>
-            </div>
-        </div>
-    </div>
+<script>
+    // --- Constants ---
+    const MAX_HISTORY_ITEMS = 10;
+    const ART_STYLES = ["Photorealistic", "Impressionistic", "Surrealist", "Cyberpunk", "Steampunk", "Fantasy Art", "Abstract", "Minimalist", "Pop Art", "Anime/Manga", "Pixel Art", "Watercolor", "Oil Painting", "Charcoal Sketch", "Synthwave"];
+    const ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:3', '3:4'];
 
-    <script>
-        // Mock data for demonstration
-        const mockUsers = [
-            { id: 1, name: "John Doe", email: "john@example.com", avatar: "https://randomuser.me/api/portraits/men/1.jpg", online: true },
-            { id: 2, name: "Jane Smith", email: "jane@example.com", avatar: "https://randomuser.me/api/portraits/women/1.jpg", online: false },
-            { id: 3, name: "Bob Johnson", email: "bob@example.com", avatar: "https://randomuser.me/api/portraits/men/2.jpg", online: true },
-            { id: 4, name: "Alice Williams", email: "alice@example.com", avatar: "https://randomuser.me/api/portraits/women/2.jpg", online: false },
-        ];
+    // --- DOM Elements ---
+    const promptInput = document.getElementById('prompt');
+    const negativePromptInput = document.getElementById('negative-prompt');
+    const artStyleSelect = document.getElementById('art-style-select');
+    const aspectRatioSelect = document.getElementById('aspect-ratio-select');
+    
+    const themeToggleButton = document.getElementById('theme-toggle-button');
+    const themeIconSun = document.getElementById('theme-icon-sun');
+    const themeIconMoon = document.getElementById('theme-icon-moon');
 
-        const mockMessages = {
-            1: [
-                { id: 1, senderId: 1, text: "Hey there!", timestamp: Date.now() - 3600000, type: "text" },
-                { id: 2, senderId: 0, text: "Hi John! How are you?", timestamp: Date.now() - 1800000, type: "text" },
-                { id: 3, senderId: 1, text: "I'm good, thanks for asking!", timestamp: Date.now() - 900000, type: "text" },
-            ],
-            2: [
-                { id: 1, senderId: 2, text: "Hello!", timestamp: Date.now() - 7200000, type: "text" },
-                { id: 2, senderId: 0, text: "Hi Jane! What's up?", timestamp: Date.now() - 3600000, type: "text" },
-                { id: 3, senderId: 2, text: "Not much, just working on some projects.", timestamp: Date.now() - 1800000, type: "text" },
-            ],
-            3: [
-                { id: 1, senderId: 3, text: "Hey buddy!", timestamp: Date.now() - 10800000, type: "text" },
-                { id: 2, senderId: 0, text: "Hi Bob! Long time no see!", timestamp: Date.now() - 5400000, type: "text" },
-                { id: 3, senderId: 3, text: "Yeah, we should catch up soon!", timestamp: Date.now() - 2700000, type: "text" },
-            ],
-            4: [
-                { id: 1, senderId: 4, text: "Good morning!", timestamp: Date.now() - 14400000, type: "text" },
-                { id: 2, senderId: 0, text: "Morning Alice! How are you today?", timestamp: Date.now() - 7200000, type: "text" },
-                { id: 3, senderId: 4, text: "I'm doing well, thanks for asking!", timestamp: Date.now() - 3600000, type: "text" },
-            ]
+    const enhanceStyleButton = document.getElementById('enhance-style-button');
+    const enhanceStyleButtonText = document.getElementById('enhance-style-button-text');
+    const enhanceStyleLoader = document.getElementById('enhance-style-loader');
+    const styleEnhanceError = document.getElementById('style-enhance-error');
+
+    const suggestPromptsButton = document.getElementById('suggest-prompts-button');
+    const suggestPromptsButtonText = document.getElementById('suggest-prompts-button-text');
+    const suggestPromptsLoader = document.getElementById('suggest-prompts-loader');
+    const suggestionsContainer = document.getElementById('suggestions-container');
+    const closeSuggestionsButton = document.getElementById('close-suggestions-button');
+    const suggestionsError = document.getElementById('suggestions-error');
+    const suggestionsLoaderText = document.getElementById('suggestions-loader-text');
+    const suggestionsList = document.getElementById('suggestions-list');
+    const noSuggestionsText = document.getElementById('no-suggestions-text');
+
+    const historySection = document.getElementById('history-section');
+    const historyItemsContainer = document.getElementById('history-items-container');
+
+    const toggleAdvancedOptionsButton = document.getElementById('toggle-advanced-options-button');
+    const advancedOptionsSection = document.getElementById('advanced-options-section');
+
+    const generateImageButton = document.getElementById('generate-image-button');
+    const generateImageButtonText = document.getElementById('generate-image-button-text');
+    const generateImageLoader = document.getElementById('generate-image-loader');
+    const regenerateImageButton = document.getElementById('regenerate-image-button');
+    
+    const mainErrorMessage = document.getElementById('main-error-message');
+    const mainErrorText = document.getElementById('main-error-text');
+
+    const imageDisplayArea = document.getElementById('image-display-area');
+    const imagePlaceholder = document.getElementById('image-placeholder');
+    const imageLoadingPlaceholder = document.getElementById('image-loading-placeholder');
+    const generatedImageContainer = document.getElementById('generated-image-container');
+    const generatedImage = document.getElementById('generated-image');
+    const downloadImageButton = document.getElementById('download-image-button');
+
+    const generateDescriptionButton = document.getElementById('generate-description-button');
+    const generateDescriptionButtonText = document.getElementById('generate-description-button-text');
+    const generateDescriptionLoader = document.getElementById('generate-description-loader');
+    const descriptionError = document.getElementById('description-error');
+    const descriptionLoaderText = document.getElementById('description-loader-text');
+    const generatedDescriptionText = document.getElementById('generated-description-text');
+
+    const suggestTitlesButton = document.getElementById('suggest-titles-button');
+    const suggestTitlesButtonText = document.getElementById('suggest-titles-button-text');
+    const suggestTitlesLoader = document.getElementById('suggest-titles-loader');
+    const titlesContainer = document.getElementById('titles-container');
+    const titlesError = document.getElementById('titles-error');
+    const titlesLoaderText = document.getElementById('titles-loader-text');
+    const titlesList = document.getElementById('titles-list');
+    const noTitlesText = document.getElementById('no-titles-text');
+
+    // --- Application State (simulated) ---
+    let appState = {
+        prompt: '',
+        negativePrompt: '',
+        imageUrl: '',
+        isLoadingImage: false,
+        error: '',
+        showAdvanced: false,
+        aspectRatio: ASPECT_RATIOS[0],
+        darkMode: true,
+        history: [],
+        selectedHistoryTimestamp: null,
+        suggestedPrompts: [],
+        isLoadingSuggestions: false,
+        suggestionsError: '',
+        showSuggestions: false,
+        generatedDescription: '',
+        isLoadingDescription: false,
+        descriptionError: '',
+        originalPromptForDescription: '', // Stores the prompt used for the current image
+        creativeTitles: [],
+        isLoadingTitles: false,
+        titlesError: '',
+        showTitles: false,
+        selectedStyle: ART_STYLES[0],
+        isLoadingStyleEnhance: false,
+        styleEnhanceError: ''
+    };
+
+    // --- Helper Functions ---
+    function toTitleCase(str) {
+        if (!str) return '';
+        const result = str.replace(/([A-Z])/g, ' $1');
+        return result.charAt(0).toUpperCase() + result.slice(1);
+    }
+
+    function setElementVisibility(element, visible) {
+        if (visible) {
+            element.classList.remove('hidden');
+        } else {
+            element.classList.add('hidden');
+        }
+    }
+
+    function setLoadingState(buttonTextEl, loaderEl, isLoading, loadingText, defaultText) {
+        buttonTextEl.textContent = isLoading ? loadingText : defaultText;
+        setElementVisibility(loaderEl, isLoading);
+        loaderEl.closest('button').disabled = isLoading;
+    }
+    
+    // --- Theme Management ---
+    function applyTheme() {
+        const root = document.documentElement;
+        if (appState.darkMode) {
+            root.classList.add('dark');
+            themeIconSun.style.display = 'inline-block';
+            themeIconMoon.style.display = 'none';
+        } else {
+            root.classList.remove('dark');
+            themeIconSun.style.display = 'none';
+            themeIconMoon.style.display = 'inline-block';
+        }
+        localStorage.setItem('theme', appState.darkMode ? 'dark' : 'light');
+    }
+
+    function toggleTheme() {
+        appState.darkMode = !appState.darkMode;
+        applyTheme();
+    }
+
+    // --- UI Update Functions ---
+    function updateUI() {
+        promptInput.value = appState.prompt;
+        negativePromptInput.value = appState.negativePrompt;
+        aspectRatioSelect.value = appState.aspectRatio;
+        artStyleSelect.value = appState.selectedStyle;
+
+        // Main error
+        setElementVisibility(mainErrorMessage, !!appState.error);
+        mainErrorText.textContent = appState.error;
+
+        // Image display
+        if (appState.isLoadingImage) {
+            setElementVisibility(imagePlaceholder, false);
+            setElementVisibility(generatedImageContainer, false);
+            setElementVisibility(imageLoadingPlaceholder, true);
+        } else if (appState.imageUrl) {
+            setElementVisibility(imagePlaceholder, false);
+            setElementVisibility(imageLoadingPlaceholder, false);
+            generatedImage.src = appState.imageUrl;
+            setElementVisibility(generatedImageContainer, true);
+        } else {
+            setElementVisibility(imageLoadingPlaceholder, false);
+            setElementVisibility(generatedImageContainer, false);
+            setElementVisibility(imagePlaceholder, true);
+        }
+        downloadImageButton.disabled = !appState.imageUrl;
+
+        // Advanced options
+        setElementVisibility(advancedOptionsSection, appState.showAdvanced);
+        toggleAdvancedOptionsButton.textContent = appState.showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options';
+        
+        // Buttons disabled state
+        const commonDisabled = appState.isLoadingImage || appState.isLoadingSuggestions || appState.isLoadingStyleEnhance;
+        generateImageButton.disabled = commonDisabled || !appState.prompt.trim();
+        regenerateImageButton.disabled = commonDisabled || (!appState.prompt.trim() && !appState.originalPromptForDescription);
+        suggestPromptsButton.disabled = commonDisabled || !appState.prompt.trim();
+        enhanceStyleButton.disabled = commonDisabled || !appState.prompt.trim();
+        generateDescriptionButton.disabled = commonDisabled || !appState.imageUrl;
+        suggestTitlesButton.disabled = commonDisabled || !appState.imageUrl;
+
+
+        // Prompt Suggestions UI
+        setElementVisibility(suggestionsContainer, appState.showSuggestions);
+        setElementVisibility(suggestionsError, !!appState.suggestionsError);
+        suggestionsError.textContent = appState.suggestionsError;
+        setElementVisibility(suggestionsLoaderText, appState.isLoadingSuggestions && !appState.suggestionsError);
+        suggestionsList.innerHTML = '';
+        if (!appState.isLoadingSuggestions && appState.suggestedPrompts.length > 0) {
+            appState.suggestedPrompts.forEach(p => {
+                const li = document.createElement('li');
+                li.className = 'text-xs text-sky-600 dark:text-sky-300 hover:text-sky-500 dark:hover:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-500/20 p-1.5 rounded cursor-pointer transition-colors';
+                li.textContent = p;
+                li.onclick = () => {
+                    appState.prompt = p;
+                    appState.showSuggestions = false;
+                    updateUI();
+                };
+                suggestionsList.appendChild(li);
+            });
+            setElementVisibility(noSuggestionsText, false);
+        } else if (!appState.isLoadingSuggestions && !appState.suggestionsError) {
+             setElementVisibility(noSuggestionsText, true);
+        }
+
+
+        // Style Enhance UI
+        setElementVisibility(styleEnhanceError, !!appState.styleEnhanceError);
+        styleEnhanceError.textContent = appState.styleEnhanceError;
+
+        // Description UI
+        setElementVisibility(descriptionError, !!appState.descriptionError);
+        descriptionError.textContent = appState.descriptionError;
+        setElementVisibility(descriptionLoaderText, appState.isLoadingDescription && !appState.descriptionError);
+        setElementVisibility(generatedDescriptionText, !!appState.generatedDescription && !appState.isLoadingDescription);
+        generatedDescriptionText.textContent = appState.generatedDescription;
+        
+        // Titles UI
+        setElementVisibility(titlesContainer, appState.showTitles);
+        setElementVisibility(titlesError, !!appState.titlesError);
+        titlesError.textContent = appState.titlesError;
+        setElementVisibility(titlesLoaderText, appState.isLoadingTitles && !appState.titlesError);
+        titlesList.innerHTML = '';
+        if (!appState.isLoadingTitles && appState.creativeTitles.length > 0) {
+            appState.creativeTitles.forEach(title => {
+                const li = document.createElement('li');
+                li.className = 'text-xs text-teal-700 dark:text-teal-300 p-1 rounded';
+                li.textContent = title;
+                titlesList.appendChild(li);
+            });
+            setElementVisibility(noTitlesText, false);
+        } else if (!appState.isLoadingTitles && !appState.titlesError) {
+            setElementVisibility(noTitlesText, true);
+        }
+
+        // History UI
+        setElementVisibility(historySection, appState.history.length > 0);
+        historyItemsContainer.innerHTML = '';
+        appState.history.forEach(item => {
+            const div = document.createElement('div');
+            div.className = `flex-shrink-0 cursor-pointer rounded-md overflow-hidden border-2 transition-all hover:opacity-80 ${appState.selectedHistoryTimestamp === item.timestamp ? 'border-sky-500 shadow-md' : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'}`;
+            div.title = `Prompt: ${item.prompt.substring(0, 50)}...`;
+            div.onclick = () => loadFromHistory(item);
+            const img = document.createElement('img');
+            img.src = item.imageUrl;
+            img.alt = `Generated art for prompt: ${item.prompt.substring(0, 50)}...`;
+            img.className = 'h-16 w-16 object-cover';
+            div.appendChild(img);
+            historyItemsContainer.appendChild(div);
+        });
+    }
+
+
+    // --- API Call Functions ---
+    async function geminiApiCall(textPromptForLLM) {
+        const apiKey = "AIzaSyBUtCcM5FAnYmAJjpKad6UEcZLObyLgjhs"; // Canvas will inject this
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+        const payload = { contents: [{ role: "user", parts: [{ text: textPromptForLLM }] }] };
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Gemini API Error Data:', errorData);
+                throw new Error(errorData.error?.message || `Gemini API HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
+                return result.candidates[0].content.parts[0].text;
+            } else {
+                console.error('Unexpected Gemini API response structure:', result);
+                throw new Error('Failed to get valid response from Gemini API.');
+            }
+        } catch (err) {
+            console.error('Gemini API call failed:', err);
+            throw err;
+        }
+    }
+
+    async function handleGenerateImage() {
+        appState.prompt = promptInput.value;
+        if (!appState.prompt.trim()) {
+            appState.error = 'Prompt cannot be empty.';
+            updateUI();
+            return;
+        }
+        
+        appState.isLoadingImage = true;
+        appState.error = '';
+        appState.imageUrl = '';
+        appState.generatedDescription = '';
+        appState.descriptionError = '';
+        appState.creativeTitles = [];
+        appState.titlesError = '';
+        appState.showTitles = false;
+        appState.originalPromptForDescription = appState.prompt;
+        appState.selectedHistoryTimestamp = null;
+        updateUI();
+        setLoadingState(generateImageButtonText, generateImageLoader, true, "Generating...", "Generate Image");
+
+        const apiKey = ""; // Canvas will inject this
+        const payload = {
+            instances: [{ prompt: appState.prompt }],
+            parameters: {
+                sampleCount: 1,
+                aspectRatio: appState.aspectRatio,
+                negativePrompt: appState.negativePrompt || undefined,
+            }
         };
 
-        // App state
-        let currentUser = null;
-        let currentChat = null;
-        let socket = null;
+        try {
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
 
-        // DOM elements
-        const authScreen = document.getElementById('auth-screen');
-        const appContainer = document.getElementById('app-container');
-        const loginForm = document.getElementById('login-form');
-        const registerForm = document.getElementById('register-form');
-        const switchToRegister = document.getElementById('switch-to-register');
-        const switchToLogin = document.getElementById('switch-to-login');
-        const loginBtn = document.getElementById('login-btn');
-        const registerBtn = document.getElementById('register-btn');
-        const chatsList = document.getElementById('chats-list');
-        const chatArea = document.getElementById('chat-area');
-        const chatMessages = document.getElementById('chat-messages');
-        const messageInput = document.getElementById('message-input');
-        const sendBtn = document.getElementById('send-btn');
-        const chatName = document.getElementById('chat-name');
-        const chatStatus = document.getElementById('chat-status');
-        const chatAvatar = document.getElementById('chat-avatar');
-        const attachBtn = document.getElementById('attach-btn');
-        const imageModal = document.getElementById('image-modal');
-        const closeImageModal = document.getElementById('close-image-modal');
-        const imageUpload = document.getElementById('image-upload');
-        const imagePreviewContainer = document.getElementById('image-preview-container');
-        const imagePreview = document.getElementById('image-preview');
-        const sendImageBtn = document.getElementById('send-image-btn');
-        const backButton = document.getElementById('back-button');
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Imagen API Error Data:', errorData);
+                throw new Error(errorData.error?.message || `Imagen API HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
 
-        // Event listeners
-        switchToRegister.addEventListener('click', () => {
-            loginForm.classList.add('hidden');
-            registerForm.classList.remove('hidden');
+            if (result.predictions && result.predictions[0]?.bytesBase64Encoded) {
+                appState.imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+                const newHistoryItem = {
+                    prompt: appState.prompt,
+                    negativePrompt: appState.negativePrompt,
+                    aspectRatio: appState.aspectRatio,
+                    imageUrl: appState.imageUrl,
+                    timestamp: new Date().toISOString()
+                };
+                appState.history = [newHistoryItem, ...appState.history].slice(0, MAX_HISTORY_ITEMS);
+            } else if (result.predictions && result.predictions[0]?.error) {
+                console.error('Imagen Prediction Error:', result.predictions[0].error);
+                let detailedError = "Image generation failed.";
+                if (result.predictions[0].error.code === 8) {
+                    detailedError = "Image generation blocked due to safety policies. Please revise your prompt."
+                } else if (result.predictions[0].error.message) {
+                    detailedError = `Model error: ${result.predictions[0].error.message}`;
+                }
+                appState.error = detailedError;
+            } else {
+                console.error('Unexpected Imagen API response structure:', result);
+                appState.error = 'Failed to get image data from Imagen API response.';
+            }
+        } catch (err) {
+            console.error('Image generation failed:', err);
+            appState.error = err.message || 'An unexpected error occurred during image generation.';
+        } finally {
+            appState.isLoadingImage = false;
+            setLoadingState(generateImageButtonText, generateImageLoader, false, "Generating...", "Generate Image");
+            updateUI();
+        }
+    }
+
+    // --- Event Handlers ---
+    async function handleSuggestPrompts() {
+        appState.prompt = promptInput.value;
+        if (!appState.prompt.trim()) {
+            appState.suggestionsError = 'Please enter some keywords or an idea first.';
+            appState.showSuggestions = true;
+            appState.suggestedPrompts = [];
+            updateUI();
+            return;
+        }
+        appState.isLoadingSuggestions = true;
+        appState.suggestionsError = '';
+        appState.suggestedPrompts = [];
+        appState.showSuggestions = true;
+        updateUI();
+        setLoadingState(suggestPromptsButtonText, suggestPromptsLoader, true, "Suggesting...", "Suggest Prompts");
+
+        const metaPrompt = `Based on the following keywords/idea: "${appState.prompt}", generate 3 creative and detailed image generation prompts. Each prompt should be on a new line. Do not include numbering or bullet points, just the prompts.`;
+        try {
+            const suggestionsText = await geminiApiCall(metaPrompt);
+            appState.suggestedPrompts = suggestionsText.split('\n').filter(p => p.trim() !== '');
+        } catch (err) {
+            appState.suggestionsError = err.message || 'Failed to fetch prompt suggestions.';
+        } finally {
+            appState.isLoadingSuggestions = false;
+            setLoadingState(suggestPromptsButtonText, suggestPromptsLoader, false, "Suggesting...", "Suggest Prompts");
+            updateUI();
+        }
+    }
+
+    async function handleEnhancePromptWithStyle() {
+        appState.prompt = promptInput.value;
+        if (!appState.prompt.trim()) {
+            appState.styleEnhanceError = 'Please enter a prompt to enhance.';
+            updateUI();
+            return;
+        }
+        if (!appState.selectedStyle) {
+            appState.styleEnhanceError = 'Please select a style.';
+            updateUI();
+            return;
+        }
+        appState.isLoadingStyleEnhance = true;
+        appState.styleEnhanceError = '';
+        updateUI();
+        setLoadingState(enhanceStyleButtonText, enhanceStyleLoader, true, "Enhancing...", "Enhance Style");
+
+        const metaPrompt = `Rewrite the following image generation prompt to strongly incorporate the artistic style of "${appState.selectedStyle}". Only output the revised prompt.
+Original prompt: "${appState.prompt}"
+Style to incorporate: "${appState.selectedStyle}"
+Revised prompt:`;
+        try {
+            const enhancedPromptText = await geminiApiCall(metaPrompt);
+            appState.prompt = enhancedPromptText.trim();
+        } catch (err) {
+            appState.styleEnhanceError = err.message || 'Failed to enhance prompt with style.';
+        } finally {
+            appState.isLoadingStyleEnhance = false;
+            setLoadingState(enhanceStyleButtonText, enhanceStyleLoader, false, "Enhancing...", "Enhance Style");
+            updateUI();
+        }
+    }
+    
+    async function handleGenerateDescription() {
+        if (!appState.originalPromptForDescription) {
+            appState.descriptionError = 'No prompt available to generate description from.';
+            updateUI();
+            return;
+        }
+        appState.isLoadingDescription = true;
+        appState.descriptionError = '';
+        appState.generatedDescription = '';
+        updateUI();
+        setLoadingState(generateDescriptionButtonText, generateDescriptionLoader, true, "Generating...", "Generate Description");
+
+        const metaPrompt = `Write a short, imaginative description or a mini-story (2-3 sentences) inspired by an image that was generated from the following prompt: "${appState.originalPromptForDescription}".`;
+        try {
+            const descriptionText = await geminiApiCall(metaPrompt);
+            appState.generatedDescription = descriptionText;
+        } catch (err) {
+            appState.descriptionError = err.message || 'Failed to generate description.';
+        } finally {
+            appState.isLoadingDescription = false;
+            setLoadingState(generateDescriptionButtonText, generateDescriptionLoader, false, "Generating...", "Generate Description");
+            updateUI();
+        }
+    }
+
+    async function handleSuggestTitles() {
+        if (!appState.originalPromptForDescription) {
+            appState.titlesError = 'Generate an image first to suggest titles.';
+            appState.showTitles = true;
+            appState.creativeTitles = [];
+            updateUI();
+            return;
+        }
+        appState.isLoadingTitles = true;
+        appState.titlesError = '';
+        appState.creativeTitles = [];
+        appState.showTitles = true;
+        updateUI();
+        setLoadingState(suggestTitlesButtonText, suggestTitlesLoader, true, "Suggesting...", "Suggest Titles");
+
+        let contextForTitles = `Original prompt for the artwork: "${appState.originalPromptForDescription}"`;
+        if (appState.generatedDescription) {
+            contextForTitles += `\nGenerated description: "${appState.generatedDescription}"`;
+        }
+        const metaPrompt = `Based on the following information about an artwork, suggest 3-4 creative and concise titles. Each title should be on a new line. Do not include numbering or bullet points.
+${contextForTitles}
+Suggested titles:`;
+        try {
+            const titlesText = await geminiApiCall(metaPrompt);
+            appState.creativeTitles = titlesText.split('\n').filter(t => t.trim() !== '');
+        } catch (err) {
+            appState.titlesError = err.message || 'Failed to fetch titles.';
+        } finally {
+            appState.isLoadingTitles = false;
+            setLoadingState(suggestTitlesButtonText, suggestTitlesLoader, false, "Suggesting...", "Suggest Titles");
+            updateUI();
+        }
+    }
+
+    function handleDownloadImage() {
+        if (!appState.imageUrl) return;
+        const link = document.createElement('a');
+        link.href = appState.imageUrl;
+        const safePrompt = (appState.originalPromptForDescription || appState.prompt).replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0,30);
+        link.download = `ai_image_${safePrompt || 'generated'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    function handleRegenerateImage() {
+        const promptToRegenerate = appState.originalPromptForDescription || appState.prompt;
+        if (promptToRegenerate) {
+            appState.prompt = promptToRegenerate;
+            // If negative prompt and aspect ratio were part of the original generation, 
+            // they are already in appState if loaded from history, or current values will be used.
+            handleGenerateImage();
+        } else {
+            appState.error = 'Cannot regenerate without a prompt.';
+            updateUI();
+        }
+    }
+
+    function loadFromHistory(item) {
+        appState.prompt = item.prompt;
+        appState.negativePrompt = item.negativePrompt || '';
+        appState.aspectRatio = item.aspectRatio;
+        appState.imageUrl = item.imageUrl;
+        appState.originalPromptForDescription = item.prompt;
+        appState.selectedHistoryTimestamp = item.timestamp;
+        appState.generatedDescription = '';
+        appState.creativeTitles = [];
+        appState.showTitles = false;
+        appState.descriptionError = '';
+        appState.titlesError = '';
+        appState.error = '';
+        updateUI();
+    }
+
+    // --- Initialization ---
+    function init() {
+        // Populate Art Styles Select
+        ART_STYLES.forEach(style => {
+            const option = document.createElement('option');
+            option.value = style;
+            option.textContent = style;
+            artStyleSelect.appendChild(option);
+        });
+        artStyleSelect.value = appState.selectedStyle;
+
+        // Populate Aspect Ratios Select
+        ASPECT_RATIOS.forEach(ratio => {
+            const option = document.createElement('option');
+            option.value = ratio;
+            option.textContent = toTitleCase(ratio);
+            aspectRatioSelect.appendChild(option);
+        });
+        aspectRatioSelect.value = appState.aspectRatio;
+
+        // Load theme from localStorage
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme) {
+            appState.darkMode = storedTheme === 'dark';
+        } else {
+            appState.darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        applyTheme(); // Apply initially
+
+        // Add event listeners
+        themeToggleButton.addEventListener('click', toggleTheme);
+        
+        promptInput.addEventListener('input', (e) => appState.prompt = e.target.value);
+        negativePromptInput.addEventListener('input', (e) => appState.negativePrompt = e.target.value);
+        artStyleSelect.addEventListener('change', (e) => appState.selectedStyle = e.target.value);
+        aspectRatioSelect.addEventListener('change', (e) => appState.aspectRatio = e.target.value);
+
+        enhanceStyleButton.addEventListener('click', handleEnhancePromptWithStyle);
+        suggestPromptsButton.addEventListener('click', handleSuggestPrompts);
+        closeSuggestionsButton.addEventListener('click', () => {
+            appState.showSuggestions = false;
+            updateUI();
         });
 
-        switchToLogin.addEventListener('click', () => {
-            registerForm.classList.add('hidden');
-            loginForm.classList.remove('hidden');
+        toggleAdvancedOptionsButton.addEventListener('click', () => {
+            appState.showAdvanced = !appState.showAdvanced;
+            updateUI();
         });
 
-        loginBtn.addEventListener('click', handleLogin);
-        registerBtn.addEventListener('click', handleRegister);
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
-        attachBtn.addEventListener('click', openImageModal);
-        closeImageModal.addEventListener('click', () => imageModal.classList.add('hidden'));
-        imageUpload.addEventListener('change', handleImageUpload);
-        sendImageBtn.addEventListener('click', sendImage);
-        backButton.addEventListener('click', () => chatArea.classList.remove('active'));
+        generateImageButton.addEventListener('click', handleGenerateImage);
+        regenerateImageButton.addEventListener('click', handleRegenerateImage);
+        downloadImageButton.addEventListener('click', handleDownloadImage);
+        generateDescriptionButton.addEventListener('click', handleGenerateDescription);
+        suggestTitlesButton.addEventListener('click', handleSuggestTitles);
 
-        // Initialize the app
-        function init() {
-            // Check if user is already logged in (in a real app, you'd check localStorage or cookies)
-            const isLoggedIn = localStorage.getItem('isLoggedIn');
-            if (isLoggedIn) {
-                // In a real app, you'd fetch the user data from your backend
-                currentUser = {
-                    id: 0,
-                    name: "You",
-                    email: localStorage.getItem('userEmail'),
-                    avatar: "https://randomuser.me/api/portraits/lego/1.jpg"
-                };
-                showApp();
-            } else {
-                showAuth();
-            }
-        }
+        // Initial UI render
+        updateUI();
+    }
 
-        function showAuth() {
-            authScreen.classList.remove('hidden');
-            appContainer.classList.add('hidden');
-        }
+    // Run init when the DOM is fully loaded
+    document.addEventListener('DOMContentLoaded', init);
 
-        function showApp() {
-            authScreen.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            renderChatList();
-            setupSocket();
-        }
-
-        function handleLogin() {
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            // In a real app, you'd validate and send to your backend
-            if (email && password) {
-                // Mock login
-                currentUser = {
-                    id: 0,
-                    name: "You",
-                    email: email,
-                    avatar: "https://randomuser.me/api/portraits/lego/1.jpg"
-                };
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userEmail', email);
-                showApp();
-            } else {
-                alert('Please enter both email and password');
-            }
-        }
-
-        function handleRegister() {
-            const name = document.getElementById('register-name').value;
-            const email = document.getElementById('register-email').value;
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-
-            if (password !== confirmPassword) {
-                alert('Passwords do not match');
-                return;
-            }
-
-            // In a real app, you'd validate and send to your backend
-            if (name && email && password) {
-                // Mock registration
-                currentUser = {
-                    id: 0,
-                    name: name,
-                    email: email,
-                    avatar: "https://randomuser.me/api/portraits/lego/1.jpg"
-                };
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('userEmail', email);
-                showApp();
-            } else {
-                alert('Please fill in all fields');
-            }
-        }
-
-        function renderChatList() {
-            chatsList.innerHTML = '';
-            mockUsers.forEach(user => {
-                const lastMessage = mockMessages[user.id] ? mockMessages[user.id][mockMessages[user.id].length - 1] : null;
-                
-                const chatItem = document.createElement('div');
-                chatItem.className = 'chat-item';
-                chatItem.dataset.userId = user.id;
-                chatItem.addEventListener('click', () => openChat(user.id));
-
-                chatItem.innerHTML = `
-                    <div class="chat-item-avatar">
-                        <img src="${user.avatar}" alt="${user.name}">
-                        ${user.online ? '<div class="online-indicator"></div>' : ''}
-                    </div>
-                    <div class="chat-item-info">
-                        <h3>${user.name}</h3>
-                        <p>${lastMessage ? lastMessage.text : 'No messages yet'}</p>
-                    </div>
-                    <div class="chat-item-time">
-                        ${lastMessage ? formatTime(lastMessage.timestamp) : ''}
-                    </div>
-                `;
-
-                chatsList.appendChild(chatItem);
-            });
-        }
-
-        function openChat(userId) {
-            currentChat = userId;
-            const user = mockUsers.find(u => u.id === userId);
-            
-            chatName.textContent = user.name;
-            chatStatus.textContent = user.online ? 'Online' : 'Offline';
-            chatAvatar.src = user.avatar;
-            
-            renderMessages(userId);
-            
-            // On mobile, show the chat area
-            if (window.innerWidth <= 768) {
-                chatArea.classList.add('active');
-            }
-        }
-
-        function renderMessages(userId) {
-            chatMessages.innerHTML = '';
-            
-            if (!mockMessages[userId]) {
-                mockMessages[userId] = [];
-            }
-            
-            mockMessages[userId].forEach(message => {
-                const isCurrentUser = message.senderId === 0;
-                const sender = isCurrentUser ? currentUser : mockUsers.find(u => u.id === message.senderId);
-                
-                const messageElement = document.createElement('div');
-                messageElement.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
-                
-                if (message.type === 'text') {
-                    messageElement.innerHTML = `
-                        <span class="message-sender">${sender.name}</span>
-                        <div class="message-text">${message.text}</div>
-                        <div class="message-time">${formatTime(message.timestamp)}</div>
-                    `;
-                } else if (message.type === 'image') {
-                    messageElement.innerHTML = `
-                        <span class="message-sender">${sender.name}</span>
-                        <img src="${message.content}" class="message-image" alt="Sent image">
-                        <div class="message-time">${formatTime(message.timestamp)}</div>
-                    `;
-                }
-                
-                chatMessages.appendChild(messageElement);
-            });
-            
-            // Scroll to bottom
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function sendMessage() {
-            const text = messageInput.value.trim();
-            if (!text || !currentChat) return;
-            
-            // Create new message
-            const newMessage = {
-                id: mockMessages[currentChat].length + 1,
-                senderId: 0,
-                text: text,
-                timestamp: Date.now(),
-                type: 'text'
-            };
-            
-            // Add to messages
-            mockMessages[currentChat].push(newMessage);
-            
-            // Render the message
-            renderMessages(currentChat);
-            
-            // Clear input
-            messageInput.value = '';
-            
-            // In a real app, you'd send the message via WebSocket
-            if (socket) {
-                socket.emit('send-message', {
-                    to: currentChat,
-                    message: text
-                });
-            }
-        }
-
-        function openImageModal() {
-            imageModal.classList.remove('hidden');
-            imagePreviewContainer.style.display = 'none';
-            imageUpload.value = '';
-        }
-
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            
-            if (!file.type.match('image.*')) {
-                alert('Please select an image file');
-                return;
-            }
-            
-            const reader = new FileReader();
-            reader.onload = (event) => {
-                imagePreview.src = event.target.result;
-                imagePreviewContainer.style.display = 'block';
-            };
-            reader.readAsDataURL(file);
-        }
-
-        function sendImage() {
-            if (!imagePreview.src || !currentChat) return;
-            
-            // Create new message
-            const newMessage = {
-                id: mockMessages[currentChat].length + 1,
-                senderId: 0,
-                content: imagePreview.src,
-                timestamp: Date.now(),
-                type: 'image'
-            };
-            
-            // Add to messages
-            mockMessages[currentChat].push(newMessage);
-            
-            // Render the message
-            renderMessages(currentChat);
-            
-            // Close modal
-            imageModal.classList.add('hidden');
-            
-            // In a real app, you'd upload the image to a server and send the URL via WebSocket
-            if (socket) {
-                socket.emit('send-image', {
-                    to: currentChat,
-                    imageUrl: imagePreview.src
-                });
-            }
-        }
-
-        function setupSocket() {
-            // In a real app, you'd connect to your WebSocket server
-            // This is just a mock implementation
-            socket = {
-                emit: (event, data) => {
-                    console.log(`Socket emit: ${event}`, data);
-                },
-                on: (event, callback) => {
-                    console.log(`Socket listening for: ${event}`);
-                    // Mock receiving a message
-                    if (event === 'receive-message') {
-                        setTimeout(() => {
-                            callback({
-                                from: 1,
-                                message: "This is a mock received message"
-                            });
-                        }, 3000);
-                    }
-                }
-            };
-            
-            // Mock socket connection
-            socket.on('receive-message', (data) => {
-                if (data.from === currentChat) {
-                    const newMessage = {
-                        id: mockMessages[data.from].length + 1,
-                        senderId: data.from,
-                        text: data.message,
-                        timestamp: Date.now(),
-                        type: 'text'
-                    };
-                    
-                    mockMessages[data.from].push(newMessage);
-                    
-                    if (currentChat === data.from) {
-                        renderMessages(data.from);
-                    } else {
-                        // Update chat list to show new message
-                        renderChatList();
-                    }
-                }
-            });
-        }
-
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // Initialize the app
-        init();
-    </script>
+</script>
 </body>
-  </html>
+</html>
