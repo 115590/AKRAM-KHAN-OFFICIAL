@@ -1,272 +1,944 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
-<head> 
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>AKRAM KHAN SIM DATABASE</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Red Messenger</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client@4.7.2/dist/socket.io.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #d42a2a;
+            --primary-light: #ffebee;
+            --primary-dark: #9a0007;
+            --text-light: #f5f5f5;
+            --text-dark: #333;
+            --bg-light: #fff;
+            --bg-dark: #f5f5f5;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+        }
 
-  <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet"/>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Roboto', sans-serif;
+        }
 
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+        body {
+            background-color: var(--bg-dark);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background: black;
-      color: #fff;
-      overflow: hidden;
-      position: relative;
-    }
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background-color: var(--bg-light);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+        }
 
-    #matrix {
-      position: fixed;
-      top: 0;
-      left: 0;
-      z-index: -1;
-      width: 100%;
-      height: 100%;
-      background: black;
-    }
+        /* Sidebar */
+        .sidebar {
+            width: 30%;
+            background-color: var(--bg-light);
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
 
-    .container {
-      background: rgba(0, 0, 0, 0.6);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-      border-radius: 20px;
-      padding: 40px 30px;
-      width: 90%;
-      max-width: 400px;
-      text-align: center;
-      backdrop-filter: blur(10px);
-    }
+        .sidebar-header {
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    h1 {
-      font-size: 28px;
-      margin-bottom: 20px;
-      color: #00fff7;
-      text-shadow: 0 0 15px #00fff7;
-    }
+        .sidebar-header h2 {
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
 
-    .avatar-wrapper {
-      width: 200px;
-      height: 200px;
-      margin: 0 auto 20px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 8px solid #ff0066;
-      box-shadow: 0 0 30px #ff0066;
-      background: #111;
-    }
+        .sidebar-header-icons {
+            display: flex;
+            gap: 15px;
+        }
 
-    .avatar-wrapper img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
+        .sidebar-header-icons i {
+            cursor: pointer;
+        }
 
-    input {
-      width: 100%;
-      padding: 15px;
-      margin: 15px 0;
-      border: none;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      font-size: 16px;
-      outline: none;
-      transition: background 0.3s, box-shadow 0.3s;
-    }
+        .search-container {
+            padding: 10px;
+            background-color: var(--bg-dark);
+        }
 
-    input:focus {
-      background: rgba(255, 255, 255, 0.2);
-      box-shadow: 0 0 10px #00fff7;
-    }
+        .search-input {
+            width: 100%;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: none;
+            outline: none;
+            background-color: var(--bg-light);
+        }
 
-    button {
-      width: 100%;
-      padding: 15px;
-      margin-top: 10px;
-      background: linear-gradient(90deg, #00fff7, #4facfe);
-      border: none;
-      border-radius: 10px;
-      color: #000;
-      font-weight: bold;
-      font-size: 16px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(0, 255, 247, 0.4);
-    }
+        .chats-list {
+            flex: 1;
+            overflow-y: auto;
+        }
 
-    button:hover {
-      background: linear-gradient(90deg, #4facfe, #00fff7);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 30px rgba(0, 255, 247, 0.6);
-    }
+        .chat-item {
+            display: flex;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
 
-    .whatsapp-btn {
-      margin-top: 20px;
-      background: linear-gradient(90deg, #25D366, #128C7E);
-      color: #fff;
-    }
+        .chat-item:hover {
+            background-color: var(--bg-dark);
+        }
 
-    .whatsapp-btn:hover {
-      background: linear-gradient(90deg, #128C7E, #25D366);
-    }
+        .chat-item.active {
+            background-color: var(--primary-light);
+        }
 
-    .response-box {
-      background: rgba(255, 255, 255, 0.1);
-      margin-top: 30px;
-      padding: 20px;
-      border-radius: 15px;
-      max-height: 300px;
-      overflow-y: auto;
-      color: #fff;
-      text-align: left;
-      font-size: 14px;
-      box-shadow: inset 0 0 10px rgba(0, 255, 247, 0.2);
-    }
+        .chat-item-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 10px;
+            overflow: hidden;
+        }
 
-    .formatted-data {
-      margin-top: 10px;
-      text-align: left;
-    }
+        .chat-item-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-    .formatted-data p {
-      font-size: 16px;
-      line-height: 1.5;
-      margin: 8px 0;
-    }
+        .chat-item-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
 
-    .separator {
-      margin: 10px 0;
-      border-top: 2px solid #ff6600;
-      width: 100%;
-    }
+        .chat-item-info h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 3px;
+        }
 
-    @media screen and (max-width: 600px) {
-      .container {
-        padding: 20px;
-        width: 90%;
-        max-width: 100%;
-      }
+        .chat-item-info p {
+            font-size: 0.8rem;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
 
-      h1 {
-        font-size: 24px;
-      }
-    }
-  </style>
+        .chat-item-time {
+            font-size: 0.7rem;
+            color: #666;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 15px;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-header-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ccc;
+            margin-right: 10px;
+            overflow: hidden;
+        }
+
+        .chat-header-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chat-header-text h3 {
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .chat-header-text p {
+            font-size: 0.8rem;
+            color: #ffcccc;
+        }
+
+        .chat-header-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .chat-header-icons i {
+            cursor: pointer;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background-color: var(--bg-light);
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiPjxkZWZzPjxwYXR0ZXJuIGlkPSJwYXR0ZXJuIiB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHBhdHRlcm5Vbml0cz0idXNlclNwYWNlT25Vc2UiIHBhdHRlcm5UcmFuc2Zvcm09InJvdGF0ZSg0NSkiPjxyZWN0IHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0icmdiYSgyMTIsMjEyLDIxMiwwLjEpIi8+PC9wYXR0ZXJuPjwvZGVmcz48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSJ1cmwoI3BhdHRlcm4pIi8+PC9zdmc+');
+        }
+
+        .message {
+            max-width: 70%;
+            margin-bottom: 15px;
+            padding: 10px 15px;
+            border-radius: 18px;
+            position: relative;
+            word-wrap: break-word;
+            box-shadow: var(--shadow);
+        }
+
+        .message.received {
+            background-color: var(--bg-light);
+            border-top-left-radius: 0;
+            align-self: flex-start;
+        }
+
+        .message.sent {
+            background-color: var(--primary-light);
+            border-top-right-radius: 0;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.sent .message-sender {
+            display: none;
+        }
+
+        .message-sender {
+            position: absolute;
+            top: -15px;
+            left: 0;
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+        .message-text {
+            margin-bottom: 5px;
+        }
+
+        .message-image {
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            color: #666;
+            text-align: right;
+        }
+
+        .chat-input-container {
+            padding: 10px;
+            background-color: var(--bg-light);
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-input-icons {
+            display: flex;
+            gap: 10px;
+            margin-right: 10px;
+        }
+
+        .chat-input-icons i {
+            cursor: pointer;
+            color: var(--primary-color);
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            outline: none;
+            resize: none;
+            max-height: 100px;
+        }
+
+        .chat-send-btn {
+            margin-left: 10px;
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .chat-send-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Auth Screens */
+        .auth-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 30px;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .auth-input {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            outline: none;
+            font-size: 1rem;
+        }
+
+        .auth-input:focus {
+            border-color: var(--primary-color);
+        }
+
+        .auth-btn {
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .auth-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+        }
+
+        .auth-switch a {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: var(--primary-color);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .app-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .sidebar {
+                width: 100%;
+            }
+            
+            .chat-area {
+                display: none;
+            }
+            
+            .chat-area.active {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                z-index: 100;
+                background-color: white;
+            }
+            
+            .back-button {
+                display: block !important;
+                margin-right: 10px;
+            }
+        }
+
+        .back-button {
+            display: none;
+        }
+    </style>
 </head>
-
 <body>
-
-  <canvas id="matrix"></canvas>
-
-  <div class="container">
-    <h1>AKRAM KHAN SIM DATABASE</h1>
-
-    <div class="avatar-wrapper">
-      <img src="https://i.ibb.co/gLQnTWLN/1000031568.jpg" alt="Profile Picture" />
+    <!-- Authentication Screens -->
+    <div id="auth-screen" class="auth-container">
+        <div class="auth-header">
+            <h1>Red Messenger</h1>
+            <p>Connect with your friends</p>
+        </div>
+        <div id="login-form" class="auth-form">
+            <input type="email" id="login-email" class="auth-input" placeholder="Email" required>
+            <input type="password" id="login-password" class="auth-input" placeholder="Password" required>
+            <button id="login-btn" class="auth-btn">Log In</button>
+            <div class="auth-switch">
+                Don't have an account? <a id="switch-to-register">Sign Up</a>
+            </div>
+        </div>
+        <div id="register-form" class="auth-form hidden">
+            <input type="text" id="register-name" class="auth-input" placeholder="Name" required>
+            <input type="email" id="register-email" class="auth-input" placeholder="Email" required>
+            <input type="password" id="register-password" class="auth-input" placeholder="Password" required>
+            <input type="password" id="register-confirm-password" class="auth-input" placeholder="Confirm Password" required>
+            <button id="register-btn" class="auth-btn">Sign Up</button>
+            <div class="auth-switch">
+                Already have an account? <a id="switch-to-login">Log In</a>
+            </div>
+        </div>
     </div>
 
-    <input type="text" id="number" placeholder="Enter phone number" required />
-    <button id="fetchData">Search</button>
-
-    <a href="https://wa.me/923001881920" target="_blank">
-      <button class="whatsapp-btn">Chat on WhatsApp</button>
-    </a>
-
-    <div id="responseBox" class="response-box"></div>
-  </div>
-
-<script>
-  const fetchButton = document.getElementById("fetchData");
-  const responseBox = document.getElementById("responseBox");
-
-  fetchButton.addEventListener("click", async () => {
-    const number = document.getElementById("number").value.trim();
-    responseBox.innerHTML = '';
-
-    if (!number) {
-      alert("Please enter a valid number.");
-      return;
-    }
-
-    responseBox.innerHTML = '<p style="text-align:center;">Fetching data...</p>';
-
-    const url = `https://api.allorigins.win/get?url=${encodeURIComponent(`https://fam-official.serv00.net/sim/api.php?num=${number}`)}`;
-
-    try {
-      const response = await fetch(url);
-      const result = await response.json();
-      const apiData = JSON.parse(result.contents);
-
-      if (apiData.status === "success" && apiData.data.length > 0) {
-        let formattedData = '';
-        
-        apiData.data.forEach(user => {
-          formattedData += `
-            <div class="formatted-data">
-              <p><strong>🔹 Name:</strong> ${user.Name || "N/A"}</p>
-              <p><strong>🔹 Mobile:</strong> ${user.Mobile || "N/A"}</p>
-              <p><strong>🔹 CNIC:</strong> ${user.CNIC || "N/A"}</p>
-              <p><strong>🔹 Operator:</strong> ${user.Operator || "N/A"}</p>
-              <p><strong>🔹 Address:</strong> ${user.Address || "N/A"}</p>
+    <!-- Main App -->
+    <div id="app-container" class="app-container hidden">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Chats</h2>
+                <div class="sidebar-header-icons">
+                    <i class="material-icons">group</i>
+                    <i class="material-icons">more_vert</i>
+                </div>
             </div>
-            <div class="separator"></div>
-          `;
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search messages or users">
+            </div>
+            <div class="chats-list" id="chats-list">
+                <!-- Chat items will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chat-area">
+            <div class="chat-header">
+                <div class="chat-header-info">
+                    <i class="material-icons back-button" id="back-button">arrow_back</i>
+                    <div class="chat-header-avatar">
+                        <img id="chat-avatar" src="" alt="">
+                    </div>
+                    <div class="chat-header-text">
+                        <h3 id="chat-name">Select a chat</h3>
+                        <p id="chat-status">Online</p>
+                    </div>
+                </div>
+                <div class="chat-header-icons">
+                    <i class="material-icons">search</i>
+                    <i class="material-icons">more_vert</i>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <!-- Messages will be added here dynamically -->
+            </div>
+            <div class="chat-input-container">
+                <div class="chat-input-icons">
+                    <i class="material-icons" id="attach-btn">attach_file</i>
+                    <i class="material-icons">insert_emoticon</i>
+                </div>
+                <textarea class="chat-input" id="message-input" placeholder="Type a message"></textarea>
+                <button class="chat-send-btn" id="send-btn">
+                    <i class="material-icons">send</i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Upload Modal -->
+    <div id="image-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Upload Image</h2>
+                <button class="modal-close" id="close-image-modal">&times;</button>
+            </div>
+            <input type="file" id="image-upload" accept="image/*">
+            <div id="image-preview-container" style="margin-top: 20px; display: none;">
+                <img id="image-preview" style="max-width: 100%; max-height: 300px;">
+                <button id="send-image-btn" class="auth-btn" style="margin-top: 10px;">Send Image</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data for demonstration
+        const mockUsers = [
+            { id: 1, name: "John Doe", email: "john@example.com", avatar: "https://randomuser.me/api/portraits/men/1.jpg", online: true },
+            { id: 2, name: "Jane Smith", email: "jane@example.com", avatar: "https://randomuser.me/api/portraits/women/1.jpg", online: false },
+            { id: 3, name: "Bob Johnson", email: "bob@example.com", avatar: "https://randomuser.me/api/portraits/men/2.jpg", online: true },
+            { id: 4, name: "Alice Williams", email: "alice@example.com", avatar: "https://randomuser.me/api/portraits/women/2.jpg", online: false },
+        ];
+
+        const mockMessages = {
+            1: [
+                { id: 1, senderId: 1, text: "Hey there!", timestamp: Date.now() - 3600000, type: "text" },
+                { id: 2, senderId: 0, text: "Hi John! How are you?", timestamp: Date.now() - 1800000, type: "text" },
+                { id: 3, senderId: 1, text: "I'm good, thanks for asking!", timestamp: Date.now() - 900000, type: "text" },
+            ],
+            2: [
+                { id: 1, senderId: 2, text: "Hello!", timestamp: Date.now() - 7200000, type: "text" },
+                { id: 2, senderId: 0, text: "Hi Jane! What's up?", timestamp: Date.now() - 3600000, type: "text" },
+                { id: 3, senderId: 2, text: "Not much, just working on some projects.", timestamp: Date.now() - 1800000, type: "text" },
+            ],
+            3: [
+                { id: 1, senderId: 3, text: "Hey buddy!", timestamp: Date.now() - 10800000, type: "text" },
+                { id: 2, senderId: 0, text: "Hi Bob! Long time no see!", timestamp: Date.now() - 5400000, type: "text" },
+                { id: 3, senderId: 3, text: "Yeah, we should catch up soon!", timestamp: Date.now() - 2700000, type: "text" },
+            ],
+            4: [
+                { id: 1, senderId: 4, text: "Good morning!", timestamp: Date.now() - 14400000, type: "text" },
+                { id: 2, senderId: 0, text: "Morning Alice! How are you today?", timestamp: Date.now() - 7200000, type: "text" },
+                { id: 3, senderId: 4, text: "I'm doing well, thanks for asking!", timestamp: Date.now() - 3600000, type: "text" },
+            ]
+        };
+
+        // App state
+        let currentUser = null;
+        let currentChat = null;
+        let socket = null;
+
+        // DOM elements
+        const authScreen = document.getElementById('auth-screen');
+        const appContainer = document.getElementById('app-container');
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const switchToRegister = document.getElementById('switch-to-register');
+        const switchToLogin = document.getElementById('switch-to-login');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const chatsList = document.getElementById('chats-list');
+        const chatArea = document.getElementById('chat-area');
+        const chatMessages = document.getElementById('chat-messages');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatName = document.getElementById('chat-name');
+        const chatStatus = document.getElementById('chat-status');
+        const chatAvatar = document.getElementById('chat-avatar');
+        const attachBtn = document.getElementById('attach-btn');
+        const imageModal = document.getElementById('image-modal');
+        const closeImageModal = document.getElementById('close-image-modal');
+        const imageUpload = document.getElementById('image-upload');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const sendImageBtn = document.getElementById('send-image-btn');
+        const backButton = document.getElementById('back-button');
+
+        // Event listeners
+        switchToRegister.addEventListener('click', () => {
+            loginForm.classList.add('hidden');
+            registerForm.classList.remove('hidden');
         });
 
-        responseBox.innerHTML = formattedData;
-      } else {
-        responseBox.innerHTML = `<div class="error">❌ No data found for this number</div>`;
-      }
-    } catch (error) {
-      responseBox.innerHTML = `<div class="error">❌ API Error: ${error.message}</div>`;
-    }
-  });
-</script>
+        switchToLogin.addEventListener('click', () => {
+            registerForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+        });
 
-<!-- Matrix Effect Script -->
-<script>
-  const canvas = document.getElementById("matrix");
-  const ctx = canvas.getContext("2d");
+        loginBtn.addEventListener('click', handleLogin);
+        registerBtn.addEventListener('click', handleRegister);
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+        attachBtn.addEventListener('click', openImageModal);
+        closeImageModal.addEventListener('click', () => imageModal.classList.add('hidden'));
+        imageUpload.addEventListener('change', handleImageUpload);
+        sendImageBtn.addEventListener('click', sendImage);
+        backButton.addEventListener('click', () => chatArea.classList.remove('active'));
 
-  canvas.height = window.innerHeight;
-  canvas.width = window.innerWidth;
+        // Initialize the app
+        function init() {
+            // Check if user is already logged in (in a real app, you'd check localStorage or cookies)
+            const isLoggedIn = localStorage.getItem('isLoggedIn');
+            if (isLoggedIn) {
+                // In a real app, you'd fetch the user data from your backend
+                currentUser = {
+                    id: 0,
+                    name: "You",
+                    email: localStorage.getItem('userEmail'),
+                    avatar: "https://randomuser.me/api/portraits/lego/1.jpg"
+                };
+                showApp();
+            } else {
+                showAuth();
+            }
+        }
 
-  const letters = "01";
-  const fontSize = 14;
-  const columns = canvas.width / fontSize;
-  const drops = Array.from({ length: columns }).fill(1);
+        function showAuth() {
+            authScreen.classList.remove('hidden');
+            appContainer.classList.add('hidden');
+        }
 
-  function draw() {
-    ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#0F0";
-    ctx.font = fontSize + "px monospace";
+        function showApp() {
+            authScreen.classList.add('hidden');
+            appContainer.classList.remove('hidden');
+            renderChatList();
+            setupSocket();
+        }
 
-    for (let i = 0; i < drops.length; i++) {
-      const text = letters.charAt(Math.floor(Math.random() * letters.length));
-      ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        function handleLogin() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
 
-      if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-        drops[i] = 0;
-      }
-      drops[i]++;
-    }
-  }
+            // In a real app, you'd validate and send to your backend
+            if (email && password) {
+                // Mock login
+                currentUser = {
+                    id: 0,
+                    name: "You",
+                    email: email,
+                    avatar: "https://randomuser.me/api/portraits/lego/1.jpg"
+                };
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', email);
+                showApp();
+            } else {
+                alert('Please enter both email and password');
+            }
+        }
 
-  setInterval(draw, 33);
-</script>
+        function handleRegister() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
 
+            if (password !== confirmPassword) {
+                alert('Passwords do not match');
+                return;
+            }
+
+            // In a real app, you'd validate and send to your backend
+            if (name && email && password) {
+                // Mock registration
+                currentUser = {
+                    id: 0,
+                    name: name,
+                    email: email,
+                    avatar: "https://randomuser.me/api/portraits/lego/1.jpg"
+                };
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', email);
+                showApp();
+            } else {
+                alert('Please fill in all fields');
+            }
+        }
+
+        function renderChatList() {
+            chatsList.innerHTML = '';
+            mockUsers.forEach(user => {
+                const lastMessage = mockMessages[user.id] ? mockMessages[user.id][mockMessages[user.id].length - 1] : null;
+                
+                const chatItem = document.createElement('div');
+                chatItem.className = 'chat-item';
+                chatItem.dataset.userId = user.id;
+                chatItem.addEventListener('click', () => openChat(user.id));
+
+                chatItem.innerHTML = `
+                    <div class="chat-item-avatar">
+                        <img src="${user.avatar}" alt="${user.name}">
+                        ${user.online ? '<div class="online-indicator"></div>' : ''}
+                    </div>
+                    <div class="chat-item-info">
+                        <h3>${user.name}</h3>
+                        <p>${lastMessage ? lastMessage.text : 'No messages yet'}</p>
+                    </div>
+                    <div class="chat-item-time">
+                        ${lastMessage ? formatTime(lastMessage.timestamp) : ''}
+                    </div>
+                `;
+
+                chatsList.appendChild(chatItem);
+            });
+        }
+
+        function openChat(userId) {
+            currentChat = userId;
+            const user = mockUsers.find(u => u.id === userId);
+            
+            chatName.textContent = user.name;
+            chatStatus.textContent = user.online ? 'Online' : 'Offline';
+            chatAvatar.src = user.avatar;
+            
+            renderMessages(userId);
+            
+            // On mobile, show the chat area
+            if (window.innerWidth <= 768) {
+                chatArea.classList.add('active');
+            }
+        }
+
+        function renderMessages(userId) {
+            chatMessages.innerHTML = '';
+            
+            if (!mockMessages[userId]) {
+                mockMessages[userId] = [];
+            }
+            
+            mockMessages[userId].forEach(message => {
+                const isCurrentUser = message.senderId === 0;
+                const sender = isCurrentUser ? currentUser : mockUsers.find(u => u.id === message.senderId);
+                
+                const messageElement = document.createElement('div');
+                messageElement.className = `message ${isCurrentUser ? 'sent' : 'received'}`;
+                
+                if (message.type === 'text') {
+                    messageElement.innerHTML = `
+                        <span class="message-sender">${sender.name}</span>
+                        <div class="message-text">${message.text}</div>
+                        <div class="message-time">${formatTime(message.timestamp)}</div>
+                    `;
+                } else if (message.type === 'image') {
+                    messageElement.innerHTML = `
+                        <span class="message-sender">${sender.name}</span>
+                        <img src="${message.content}" class="message-image" alt="Sent image">
+                        <div class="message-time">${formatTime(message.timestamp)}</div>
+                    `;
+                }
+                
+                chatMessages.appendChild(messageElement);
+            });
+            
+            // Scroll to bottom
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text || !currentChat) return;
+            
+            // Create new message
+            const newMessage = {
+                id: mockMessages[currentChat].length + 1,
+                senderId: 0,
+                text: text,
+                timestamp: Date.now(),
+                type: 'text'
+            };
+            
+            // Add to messages
+            mockMessages[currentChat].push(newMessage);
+            
+            // Render the message
+            renderMessages(currentChat);
+            
+            // Clear input
+            messageInput.value = '';
+            
+            // In a real app, you'd send the message via WebSocket
+            if (socket) {
+                socket.emit('send-message', {
+                    to: currentChat,
+                    message: text
+                });
+            }
+        }
+
+        function openImageModal() {
+            imageModal.classList.remove('hidden');
+            imagePreviewContainer.style.display = 'none';
+            imageUpload.value = '';
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.match('image.*')) {
+                alert('Please select an image file');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                imagePreview.src = event.target.result;
+                imagePreviewContainer.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function sendImage() {
+            if (!imagePreview.src || !currentChat) return;
+            
+            // Create new message
+            const newMessage = {
+                id: mockMessages[currentChat].length + 1,
+                senderId: 0,
+                content: imagePreview.src,
+                timestamp: Date.now(),
+                type: 'image'
+            };
+            
+            // Add to messages
+            mockMessages[currentChat].push(newMessage);
+            
+            // Render the message
+            renderMessages(currentChat);
+            
+            // Close modal
+            imageModal.classList.add('hidden');
+            
+            // In a real app, you'd upload the image to a server and send the URL via WebSocket
+            if (socket) {
+                socket.emit('send-image', {
+                    to: currentChat,
+                    imageUrl: imagePreview.src
+                });
+            }
+        }
+
+        function setupSocket() {
+            // In a real app, you'd connect to your WebSocket server
+            // This is just a mock implementation
+            socket = {
+                emit: (event, data) => {
+                    console.log(`Socket emit: ${event}`, data);
+                },
+                on: (event, callback) => {
+                    console.log(`Socket listening for: ${event}`);
+                    // Mock receiving a message
+                    if (event === 'receive-message') {
+                        setTimeout(() => {
+                            callback({
+                                from: 1,
+                                message: "This is a mock received message"
+                            });
+                        }, 3000);
+                    }
+                }
+            };
+            
+            // Mock socket connection
+            socket.on('receive-message', (data) => {
+                if (data.from === currentChat) {
+                    const newMessage = {
+                        id: mockMessages[data.from].length + 1,
+                        senderId: data.from,
+                        text: data.message,
+                        timestamp: Date.now(),
+                        type: 'text'
+                    };
+                    
+                    mockMessages[data.from].push(newMessage);
+                    
+                    if (currentChat === data.from) {
+                        renderMessages(data.from);
+                    } else {
+                        // Update chat list to show new message
+                        renderChatList();
+                    }
+                }
+            });
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // Initialize the app
+        init();
+    </script>
 </body>
-</html>
+  </html>
