@@ -1,819 +1,645 @@
 <!DOCTYPE html>
-<html lang="en" class="dark"> <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Image Studio (HTML)</title>
+    <title>Akram Khan - Portfolio</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Orbitron:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            /* Dark Theme (Default) */
+            --bg-color: #0c0c14; 
+            --text-color: #f0f0f0; 
+            --header-bg: rgba(12, 12, 22, 0.96); /* Refined Header BG */
+            --header-shadow: rgba(0, 229, 255, 0.06); /* Refined Header Shadow */
+            --card-bg: rgba(22, 22, 40, 0.75); 
+            --card-border: rgba(0, 229, 255, 0.2);
+            --card-hover-bg: rgba(28, 28, 50, 0.85);
+            --card-hover-border: rgba(0, 229, 255, 0.55);
+            --neon-primary: #00e5ff;
+            --neon-secondary: #ff00ff;
+            --neon-accent: #39ff14; 
+            --neon-skill-icon: #00e5ff; 
+            --neon-skill-text: #f0f0f0;
+            --link-hover-color: var(--neon-secondary);
+            --nav-link-color: #b0b0c0; /* Lighter gray for nav links */
+            --nav-link-hover-color: var(--neon-primary);
+            --scrollbar-thumb: linear-gradient(var(--neon-primary), var(--neon-secondary));
+            --scrollbar-thumb-hover: linear-gradient(var(--neon-secondary), var(--neon-primary));
+            --footer-border: rgba(100, 100, 120, 0.25);
+            --whatsapp-bg: #25D366;
+            --whatsapp-text: white;
+            --whatsapp-shadow: #25D366;
+            --theme-toggle-bg: rgba(255, 255, 255, 0.07);
+            --theme-toggle-hover-bg: rgba(255, 255, 255, 0.12);
+        }
+
+        .light-theme {
+            --bg-color: #fcfdff; 
+            --text-color: #1a1a2e; 
+            --header-bg: rgba(248, 249, 253, 0.97); /* Refined Header BG */
+            --header-shadow: rgba(0, 0, 0, 0.05); /* Refined Header Shadow */
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --card-border: rgba(0, 123, 255, 0.25); 
+            --card-hover-bg: rgba(245, 248, 255, 0.9);
+            --card-hover-border: rgba(0, 123, 255, 0.5);
+            --neon-primary: #0069d9; 
+            --neon-secondary: #d63384; 
+            --neon-accent: #198754; 
+            --neon-skill-icon: var(--neon-primary); 
+            --neon-skill-text: #212529;
+            --link-hover-color: var(--neon-secondary);
+            --nav-link-color: #505060; /* Darker gray for nav links */
+            --nav-link-hover-color: var(--neon-primary);
+            --scrollbar-thumb: linear-gradient(var(--neon-primary), var(--neon-secondary));
+            --scrollbar-thumb-hover: linear-gradient(var(--neon-secondary), var(--neon-primary));
+            --footer-border: rgba(180, 180, 200, 0.4);
+            --whatsapp-bg: #0069d9;
+            --whatsapp-text: white;
+            --whatsapp-shadow: #0069d9;
+            --theme-toggle-bg: rgba(0, 0, 0, 0.03);
+            --theme-toggle-hover-bg: rgba(0, 0, 0, 0.07);
+        }
+
+        /* --- BASE STYLES --- */
         body {
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            overflow-x: hidden;
+            transition: background-color 0.4s ease, color 0.4s ease;
         }
-        /* Custom scrollbar for history (optional) */
-        .history-scrollbar::-webkit-scrollbar {
-            height: 8px;
+
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        /* --- NEON & TEXT STYLES --- */
+        .neon-text { text-shadow: 0 0 2px currentColor, 0 0 5px currentColor, 0 0 8px currentColor; }
+        .light-theme .neon-text { text-shadow: 0 1px 1px rgba(0,0,0,0.08); }
+
+        .hero-name-primary { color: var(--neon-primary); font-weight: 600; letter-spacing: 1px; }
+        .dark-theme .hero-name-primary { text-shadow: 0 0 7px var(--neon-primary), 0 0 12px var(--neon-primary), 0 0 20px var(--neon-primary), 0 0 35px var(--neon-primary), 0 0 50px var(--neon-primary), 0 0 70px #fff; }
+        
+        .hero-name-secondary { color: var(--neon-secondary); font-weight: 600; letter-spacing: 1px; }
+        .dark-theme .hero-name-secondary { text-shadow: 0 0 7px var(--neon-secondary), 0 0 12px var(--neon-secondary), 0 0 20px var(--neon-secondary), 0 0 35px var(--neon-secondary), 0 0 50px var(--neon-secondary), 0 0 70px #fff; }
+
+        .section-title-primary { color: var(--neon-primary); }
+        .dark-theme .section-title-primary.animated-section-header { animation: neonFlickerPrimaryStrong 2.5s infinite alternate; }
+        
+        .section-title-secondary { color: var(--neon-secondary); }
+        .dark-theme .section-title-secondary.animated-section-header { animation: neonFlickerSecondaryStrong 2.5s infinite alternate; }
+        
+        .neon-text-accent { color: var(--neon-accent); }
+        .dark-theme .neon-text-accent { text-shadow: 0 0 4px var(--neon-accent), 0 0 8px var(--neon-accent), 0 0 12px var(--neon-accent); }
+
+        /* --- BORDERS & BUTTONS --- */
+        .neon-border { border: 1px solid var(--card-border); }
+        .dark-theme .neon-border { box-shadow: 0 0 5px var(--card-border), inset 0 0 4px var(--card-border); }
+        .dark-theme .neon-border:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: 0 0 10px var(--card-hover-border), inset 0 0 8px var(--card-hover-border), 0 0 18px var(--neon-primary);
+            transform: translateY(-5px) scale(1.02);
         }
-        .history-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
+        .light-theme .neon-border { box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .light-theme .neon-border:hover {
+            border-color: var(--card-hover-border);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+            transform: translateY(-3px) scale(1.01);
         }
-        .history-scrollbar::-webkit-scrollbar-thumb {
-            background: #4b5563; /* gray-600 */
-            border-radius: 4px;
+        
+        .btn-neon { /* Styles updated in theme specific blocks */ }
+        .dark-theme .btn-neon {
+            background-color: transparent; border: 2px solid var(--neon-primary); color: var(--neon-primary);
+            padding: 10px 20px; text-transform: uppercase; font-weight: 600; letter-spacing: 1.2px;
+            border-radius: 6px; transition: all 0.3s ease-in-out; position: relative; overflow: hidden;
+            box-shadow: 0 0 4px var(--neon-primary), inset 0 0 4px var(--neon-primary);
         }
-        .dark .history-scrollbar::-webkit-scrollbar-thumb {
-            background: #6b7280; /* dark:gray-500 */
+        .dark-theme .btn-neon:before {
+            content: ''; position: absolute; top: 0; left: -120%; width: 100%; height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: all 0.7s;
         }
-        .history-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #374151; /* gray-700 */
+        .dark-theme .btn-neon:hover:before { left: 120%; }
+        .dark-theme .btn-neon:hover {
+            background-color: var(--neon-primary); color: #0c0c14; 
+            box-shadow: 0 0 12px var(--neon-primary), 0 0 20px var(--neon-primary), 0 0 35px var(--neon-primary);
         }
-        .dark .history-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #4b5563; /* dark:gray-600 */
+        .light-theme .btn-neon {
+            background-color: var(--neon-primary); color: white; border: 2px solid var(--neon-primary);
+            padding: 10px 20px; text-transform: uppercase; font-weight: 600; letter-spacing: 1.2px;
+            border-radius: 6px; transition: all 0.3s ease-in-out; position: relative; overflow: hidden;
+            box-shadow: 0 2px 3px rgba(0,0,0,0.08);
         }
-        /* Ensure icons are sized correctly if not using a library like Lucide directly in HTML */
-        .icon {
-            width: 1.25rem; /* 20px */
-            height: 1.25rem; /* 20px */
-            display: inline-block;
-            vertical-align: middle;
+        .light-theme .btn-neon:hover {
+            background-color: color-mix(in srgb, var(--neon-primary) 80%, black);
+            border-color: color-mix(in srgb, var(--neon-primary) 80%, black);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.12); transform: translateY(-2px);
         }
-        .icon-sm {
-            width: 1rem; /* 16px */
-            height: 1rem; /* 16px */
+        
+        .btn-whatsapp-custom { 
+            background-color: var(--whatsapp-bg) !important; border-color: var(--whatsapp-bg) !important;
+            color: var(--whatsapp-text) !important;
         }
-         .icon-xs {
-            width: 0.875rem; /* 14px */
-            height: 0.875rem; /* 14px */
+        .dark-theme .btn-whatsapp-custom:hover {
+            background-color: color-mix(in srgb, var(--whatsapp-bg) 80%, black) !important;
+            box-shadow: 0 0 12px var(--whatsapp-shadow), 0 0 20px var(--whatsapp-shadow) !important;
         }
-        .loader-spin {
-            animation: spin 1s linear infinite;
+         .light-theme .btn-whatsapp-custom:hover {
+            background-color: color-mix(in srgb, var(--whatsapp-bg) 80%, black) !important;
         }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+
+        .social-icon {
+            transition: transform 0.25s ease, color 0.25s ease, text-shadow 0.25s ease;
+            color: var(--text-color); opacity: 0.65;
         }
+        .social-icon:hover {
+            transform: scale(1.2) translateY(-2px); color: var(--link-hover-color); opacity: 1;
+        }
+        .dark-theme .social-icon:hover { text-shadow: 0 0 7px var(--link-hover-color); }
+
+        /* --- SCROLL & BACKGROUND ANIMATIONS --- */
+        .scroll-animate { opacity: 0; transform: translateY(50px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
+        .scroll-animate.animated { opacity: 1; transform: translateY(0); }
+
+        .bg-animated-lines { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; overflow: hidden; pointer-events: none;}
+        .dark-theme .bg-animated-lines span {
+            position: absolute; display: block; width: 1px; background: var(--neon-primary);
+            opacity: 0.05; animation: animateLines 30s linear infinite; 
+        }
+        .dark-theme .bg-animated-lines span:nth-child(odd) { background: var(--neon-secondary); opacity: 0.04; }
+        .dark-theme .bg-animated-lines span:nth-child(3n) { background: var(--neon-accent); opacity: 0.03; animation-duration: 35s;}
+
+        @keyframes animateLines {
+            0% { transform: translateY(-100%) rotate(0deg); }
+            100% { transform: translateY(100vh) rotate(3deg); } 
+        }
+
+        /* --- FLOATING WHATSAPP BUTTON --- */
+        .floating-whatsapp {
+            position: fixed; bottom: 55px; 
+            right: 25px; background-color: var(--whatsapp-bg);
+            color: var(--whatsapp-text); width: 56px; height: 56px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; font-size: 26px;
+            box-shadow: 0 4px 12px color-mix(in srgb, var(--whatsapp-shadow) 35%, transparent);
+            z-index: 1000; transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.3s ease;
+            animation: pulseWhatsapp 2.8s infinite ease-in-out;
+        }
+        .floating-whatsapp:hover {
+            transform: scale(1.12) rotate(4deg);
+            box-shadow: 0 7px 18px color-mix(in srgb, var(--whatsapp-shadow) 55%, transparent);
+            animation-play-state: paused;
+        }
+        @keyframes pulseWhatsapp {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px color-mix(in srgb, var(--whatsapp-shadow) 35%, transparent); }
+            50% { transform: scale(1.05); box-shadow: 0 6px 16px color-mix(in srgb, var(--whatsapp-shadow) 45%, transparent); }
+        }
+        
+        /* --- SCROLLBAR --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-color); transition: background-color 0.3s ease; }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+        /* --- CARDS --- */
+        .glass-card {
+            background: var(--card-bg); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            border-radius: 10px; border: 1px solid var(--card-border);
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .glass-card:hover {
+             background: var(--card-hover-bg); border-color: var(--card-hover-border);
+        }
+        .dark-theme .glass-card:hover { transform: translateY(-4px); box-shadow: 0 8px 18px rgba(0,0,0,0.25); }
+        .light-theme .glass-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+        /* --- HEADER --- */
+        header {
+            position: sticky; top: 0; z-index: 50; background: var(--header-bg);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); /* Increased blur for header */
+            padding: 0.75rem 0; /* Adjusted padding for new font sizes */
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 1px 6px var(--header-shadow);
+        }
+        
+        .header-brand {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 600; /* Applied via hero-name-primary */
+            letter-spacing: 1px; /* Applied via hero-name-primary */
+            font-size: 1.5rem; /* Base size for AKRAM KHAN */
+        }
+        @media (min-width: 640px) { .header-brand { font-size: 1.65rem; } }
+        @media (min-width: 1024px) { .header-brand { font-size: 1.8rem; } }
+
+        header nav a.nav-link, #mobileMenu a.nav-link {
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            color: var(--nav-link-color);
+            transition: color 0.25s ease;
+        }
+        .dark-theme header nav a.nav-link, .dark-theme #mobileMenu a.nav-link { font-weight: 400; }
+        .light-theme header nav a.nav-link, .light-theme #mobileMenu a.nav-link { font-weight: 500; }
+        
+        header nav a.nav-link:hover, #mobileMenu a.nav-link:hover {
+            color: var(--nav-link-hover-color);
+        }
+
+
+        /* --- HERO TEXT ANIMATION --- */
+        #heroTitleContainer { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .hero-title-char { display: inline-block; opacity: 0; transform: translateY(22px) scale(0.75); animation: revealChar 0.55s forwards; }
+        @keyframes revealChar { to { opacity: 1; transform: translateY(0) scale(1); } }
+
+        /* --- SECTION HEADER ANIMATION (Dark Theme Only) --- */
+        .dark-theme .animated-section-header { /* Base for animation call */ }
+        @keyframes neonFlickerPrimaryStrong { 
+            0%, 100% { text-shadow: 0 0 4px var(--neon-primary), 0 0 8px var(--neon-primary), 0 0 15px var(--neon-primary), 0 0 25px var(--neon-primary), 0 0 40px var(--neon-primary), 0 0 55px #fff; opacity: 1; }
+            50% { text-shadow: 0 0 2px var(--neon-primary), 0 0 6px var(--neon-primary), 0 0 12px var(--neon-primary), 0 0 20px #fff; opacity: 0.85; }
+        }
+        @keyframes neonFlickerSecondaryStrong { 
+            0%, 100% { text-shadow: 0 0 4px var(--neon-secondary), 0 0 8px var(--neon-secondary), 0 0 15px var(--neon-secondary), 0 0 25px var(--neon-secondary), 0 0 40px var(--neon-secondary), 0 0 55px #fff; opacity: 1; }
+            50% { text-shadow: 0 0 2px var(--neon-secondary), 0 0 6px var(--neon-secondary), 0 0 12px var(--neon-secondary), 0 0 20px #fff; opacity: 0.85; }
+        }
+        .light-theme .animated-section-header { font-weight: 700; letter-spacing: 0.3px; }
+
+        /* --- THEME TOGGLE BUTTON --- */
+        .theme-toggle-button {
+            background: var(--theme-toggle-bg); border: 1px solid transparent; 
+            font-size: 1.1rem; /* Slightly smaller icon */
+            cursor: pointer; color: var(--text-color);
+            padding: 0.35rem 0.6rem; border-radius: 6px;
+            transition: color 0.3s ease, transform 0.2s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .dark-theme .theme-toggle-button { border-color: rgba(var(--neon-primary-rgb, 0, 229, 255), 0.2); } /* Softer border */
+        .light-theme .theme-toggle-button { border-color: rgba(0,0,0,0.07); }
+
+        .theme-toggle-button:hover {
+            color: var(--link-hover-color); transform: scale(1.08) rotate(10deg);
+            background-color: var(--theme-toggle-hover-bg);
+        }
+        .dark-theme .theme-toggle-button:hover { box-shadow: 0 0 7px color-mix(in srgb, var(--neon-primary) 35%, transparent); }
+        
+        /* Footer */
+        footer { border-top: 1px solid var(--footer-border); transition: border-color 0.3s ease; }
+        .footer-heart { color: #e25555; }
+        .dark-theme .footer-heart.neon-text { text-shadow: 0 0 2px #e25555, 0 0 5px #e25555; }
+
+        /* Skills Section */
+        .skill-card {
+            background-color: var(--card-bg); border: 1px solid var(--card-border);
+            border-radius: 8px; padding: 1.25rem; text-align: center;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.3s ease, border-color 0.3s ease;
+        }
+        .skill-card:hover {
+            transform: translateY(-6px) scale(1.03); 
+            background-color: var(--card-hover-bg); border-color: var(--card-hover-border);
+        }
+        .dark-theme .skill-card:hover {
+             box-shadow: 0 0 12px var(--neon-skill-icon), 0 0 20px color-mix(in srgb, var(--neon-skill-icon) 60%, transparent), 0 0 35px color-mix(in srgb, var(--neon-skill-icon) 30%, transparent);
+        }
+        .light-theme .skill-card:hover { box-shadow: 0 5px 10px rgba(0,0,0,0.08); }
+
+        .skill-icon {
+            font-size: 2.8rem; margin-bottom: 0.6rem; color: var(--neon-skill-icon);
+            transition: color 0.3s ease, text-shadow 0.3s ease, transform 0.25s ease;
+        }
+        .dark-theme .skill-icon {
+            text-shadow: 0 0 6px var(--neon-skill-icon), 0 0 12px var(--neon-skill-icon), 0 0 20px color-mix(in srgb, var(--neon-skill-icon) 50%, transparent);
+        }
+        .skill-card:hover .skill-icon { transform: scale(1.12); }
+        .dark-theme .skill-card:hover .skill-icon {
+             text-shadow: 0 0 8px var(--neon-skill-icon), 0 0 15px var(--neon-skill-icon), 0 0 25px var(--neon-skill-icon), 0 0 40px color-mix(in srgb, var(--neon-skill-icon) 30%, #fff);
+        }
+        .skill-name {
+            font-weight: 500; color: var(--neon-skill-text); font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+        .dark-theme .skill-name { text-shadow: 0 0 3px color-mix(in srgb, var(--neon-skill-text) 30%, transparent); }
+        .light-theme .skill-name { color: var(--text-color); opacity: 0.9; }
+
     </style>
-    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
-        <symbol id="icon-refresh-cw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
-        <symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
-        <symbol id="icon-alert-triangle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.46 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></symbol>
-        <symbol id="icon-sparkles" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/><path d="M5 3v4"/><path d="M19 17v4"/><path d="M3 5h4"/><path d="M17 19h4"/></symbol>
-        <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
-        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
-        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></symbol>
-        <symbol id="icon-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
-        <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></symbol>
-        <symbol id="icon-edit-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></symbol>
-    </svg>
 </head>
-<body class="bg-gray-100 dark:bg-gradient-to-br dark:from-slate-900 dark:to-slate-800 text-gray-800 dark:text-gray-100 transition-colors duration-300">
+<body class="antialiased">
 
-    <div class="min-h-screen flex flex-col items-center justify-center p-4 selection:bg-sky-500 selection:text-white">
-        <div id="app-container" class="w-full max-w-3xl bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-6 md:p-8 transition-colors duration-300">
-            <header class="mb-6 md:mb-8 text-center relative">
-                <div class="absolute top-0 right-0 flex items-center gap-2">
-                    <button id="theme-toggle-button" class="p-2 rounded-full text-slate-700 dark:text-yellow-300 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors" aria-label="Toggle dark mode">
-                        <svg class="icon" id="theme-icon-sun" style="display:none;"><use xlink:href="#icon-sun"></use></svg>
-                        <svg class="icon" id="theme-icon-moon"><use xlink:href="#icon-moon"></use></svg>
-                    </button>
-                    <a href="https://wa.me/923001881920" target="_blank" rel="noopener noreferrer" class="p-2 rounded-full text-white bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 transition-colors" aria-label="Contact on WhatsApp">
-                        <svg class="icon"><use xlink:href="#icon-message-circle"></use></svg>
-                    </a>
-                </div>
-                
-                <h1 class="text-4xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 to-blue-500">
-                    AI Image By AKRAM
-                </h1>
-                <p class="mt-2 text-sm md:text-base text-slate-500 dark:text-slate-400">Powered by Gemini</p>
-            </header>
+    <div class="bg-animated-lines"></div>
 
-            <main>
-                <div class="mb-1">
-                    <label for="prompt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                        Enter your creative prompt:
-                    </label>
-                    <textarea id="prompt" placeholder="e.g., A futuristic cityscape at sunset, synthwave style" class="w-full p-3 bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-all duration-150 text-gray-800 dark:text-gray-100 placeholder-slate-400 dark:placeholder-slate-500 resize-none" rows="3"></textarea>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 items-end mb-4">
-                    <div class="mt-2">
-                        <label for="art-style-select" class="block text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">Select Art Style:</label>
-                        <div class="flex gap-2">
-                            <select id="art-style-select" class="flex-grow p-2 text-xs bg-slate-100 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 text-gray-800 dark:text-gray-100">
-                                </select>
-                            <button id="enhance-style-button" class="inline-flex items-center justify-center gap-1.5 text-xs text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 rounded-md whitespace-nowrap" title="Enhance prompt with selected style">
-                                <svg class="icon icon-xs"><use xlink:href="#icon-palette"></use></svg> 
-                                <span id="enhance-style-button-text">Enhance Style</span>
-                                <svg id="enhance-style-loader" class="animate-spin h-3 w-3 text-purple-500 dark:text-purple-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                            </button>
-                        </div>
-                        <p id="style-enhance-error" class="text-xs text-red-500 dark:text-red-400 mt-1 hidden"></p>
-                    </div>
-                    <div class="mt-2 sm:text-right">
-                        <button id="suggest-prompts-button" class="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-2 rounded-md">
-                            <svg class="icon icon-sm"><use xlink:href="#icon-sparkles"></use></svg> 
-                            <span id="suggest-prompts-button-text">Suggest Prompts</span>
-                            <svg id="suggest-prompts-loader" class="animate-spin h-4 w-4 text-sky-500 dark:text-sky-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        </button>
-                    </div>
-                </div>
-
-                <div id="suggestions-container" class="mb-4 p-3 bg-slate-100 dark:bg-slate-700/70 rounded-lg relative hidden">
-                    <button id="close-suggestions-button" class="absolute top-2 right-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors" title="Close suggestions">
-                        <svg class="icon icon-sm"><use xlink:href="#icon-x"></use></svg>
-                    </button>
-                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Prompt Suggestions:</h4>
-                    <p id="suggestions-error" class="text-xs text-red-500 dark:text-red-400 hidden"></p>
-                    <p id="suggestions-loader-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">Loading suggestions...</p>
-                    <ul id="suggestions-list" class="space-y-1.5"></ul>
-                    <p id="no-suggestions-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">No suggestions generated. Try different keywords.</p>
-                </div>
-                
-                <div id="history-section" class="mb-6 hidden">
-                    <h4 class="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Recent Generations:</h4>
-                    <div id="history-items-container" class="history-scrollbar flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
-                        </div>
-                </div>
-
-                <div class="mb-4">
-                    <button id="toggle-advanced-options-button" class="text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 transition-colors">
-                        Show Advanced Options
-                    </button>
-                </div>
-
-                <div id="advanced-options-section" class="mb-6 p-4 bg-slate-100 dark:bg-slate-700/50 rounded-lg space-y-4 hidden">
-                    <div>
-                        <label for="negative-prompt" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Negative Prompt (optional):
-                        </label>
-                        <input type="text" id="negative-prompt" placeholder="e.g., blurry, watermark, text, ugly" class="w-full p-2 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all duration-150 text-gray-800 dark:text-gray-100 placeholder-slate-400 dark:placeholder-slate-400">
-                    </div>
-                    <div>
-                        <label for="aspect-ratio-select" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
-                            Aspect Ratio:
-                        </label>
-                        <select id="aspect-ratio-select" class="w-full p-2 bg-white dark:bg-slate-600 border border-slate-300 dark:border-slate-500 rounded-md focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-all duration-150 text-gray-800 dark:text-gray-100">
-                            </select>
-                    </div>
-                </div>
-
-                <div class="flex flex-col sm:flex-row gap-3 mb-6">
-                    <button id="generate-image-button" class="flex-1 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center">
-                        <svg id="generate-image-loader" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        <span id="generate-image-button-text">Generate Image</span>
-                    </button>
-                    <button id="regenerate-image-button" class="sm:w-auto bg-slate-200 dark:bg-slate-600 hover:bg-slate-300 dark:hover:bg-slate-500 text-slate-700 dark:text-slate-200 font-medium py-3 px-4 rounded-lg shadow-sm hover:shadow-md transition-all duration-150 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                        <svg class="icon icon-sm"><use xlink:href="#icon-refresh-cw"></use></svg> Regenerate
-                    </button>
-                </div>
-
-                <div id="main-error-message" class="my-4 p-3 bg-red-100 dark:bg-red-500/20 border border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 rounded-lg flex items-center gap-2 hidden">
-                    <svg class="icon"><use xlink:href="#icon-alert-triangle"></use></svg>
-                    <span id="main-error-text"></span>
-                </div>
-
-                <div id="image-display-area" class="mt-6 bg-slate-100 dark:bg-slate-700/50 p-4 rounded-lg min-h-[256px] md:min-h-[384px] flex flex-col items-center justify-center">
-                    <div id="image-placeholder" class="text-center text-slate-400 dark:text-slate-500">
-                        <svg class="icon mx-auto mb-2 opacity-50" style="width: 64px; height: 64px;"><use xlink:href="#icon-image"></use></svg>
-                        <p>Your generated image will appear here.</p>
-                    </div>
-                    <div id="image-loading-placeholder" class="text-center text-slate-500 dark:text-slate-400 hidden">
-                        <svg class="animate-spin mx-auto h-10 w-10 text-sky-400 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                        <p>Conjuring pixels... please wait.</p>
-                    </div>
-                    <div id="generated-image-container" class="relative group w-full flex-col items-center hidden">
-                        <img id="generated-image" src="" alt="Generated AI art" class="max-w-full max-h-[60vh] rounded-md shadow-xl object-contain"/>
-                        <button id="download-image-button" class="absolute top-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200" title="Download Image">
-                            <svg class="icon"><use xlink:href="#icon-download"></use></svg>
-                        </button>
-                        
-                        <div class="mt-4 w-full max-w-md text-center space-y-3">
-                            <div>
-                                <button id="generate-description-button" class="inline-flex items-center gap-1.5 text-sm text-sky-600 dark:text-sky-400 hover:text-sky-500 dark:hover:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-md">
-                                    <svg class="icon icon-sm"><use xlink:href="#icon-edit-3"></use></svg> 
-                                    <span id="generate-description-button-text">Generate Description</span>
-                                    <svg id="generate-description-loader" class="animate-spin h-4 w-4 text-sky-500 dark:text-sky-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                </button>
-                                <p id="description-error" class="text-xs text-red-500 dark:text-red-400 mt-1 hidden"></p>
-                                <p id="description-loader-text" class="text-xs text-slate-500 dark:text-slate-400 mt-1 hidden">Loading description...</p>
-                                <p id="generated-description-text" class="text-sm text-slate-700 dark:text-slate-300 bg-white/80 dark:bg-slate-600/50 p-3 rounded-md mt-2 hidden"></p>
-                            </div>
-                             <div>
-                                <button id="suggest-titles-button" class="inline-flex items-center gap-1.5 text-sm text-teal-600 dark:text-teal-400 hover:text-teal-500 dark:hover:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-400/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed px-3 py-1.5 rounded-md">
-                                    <svg class="icon icon-sm"><use xlink:href="#icon-sparkles"></use></svg> 
-                                    <span id="suggest-titles-button-text">Suggest Titles</span>
-                                    <svg id="suggest-titles-loader" class="animate-spin h-4 w-4 text-teal-500 dark:text-teal-300 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                </button>
-                                <div id="titles-container" class="mt-2 p-3 bg-white/80 dark:bg-slate-600/50 rounded-lg relative hidden">
-                                    <h5 class="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Suggested Titles:</h5>
-                                    <p id="titles-error" class="text-xs text-red-500 dark:text-red-400 hidden"></p>
-                                    <p id="titles-loader-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">Loading titles...</p>
-                                    <ul id="titles-list" class="space-y-1 text-left"></ul>
-                                    <p id="no-titles-text" class="text-xs text-slate-500 dark:text-slate-400 hidden">No titles suggested.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </main>
-
-            <footer class="mt-8 text-center">
-                <p class="text-xs text-slate-400 dark:text-slate-500">
-                    Ensure your prompts adhere to safety guidelines. Results may vary.
-                </p>
-                <div class="mt-2 flex justify-center gap-4">
-                    <a href="https://wa.me/923001881920" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300">
-                        <svg class="icon icon-sm"><use xlink:href="#icon-message-circle"></use></svg> Contact Support
-                    </a>
-                </div>
-            </footer>
+    <header>
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
+            <a href="#" class="header-brand hero-name-primary">AKRAM KHAN</a>
+            <nav class="hidden md:flex items-center space-x-4 lg:space-x-5">
+                <a href="#home" class="nav-link text-xs lg:text-sm">Home</a>
+                <a href="#about" class="nav-link text-xs lg:text-sm">About</a>
+                <a href="#skills" class="nav-link text-xs lg:text-sm">Skills</a>
+                <a href="#tech" class="nav-link text-xs lg:text-sm">Showcase</a>
+                <a href="#contact" class="nav-link text-xs lg:text-sm">Contact</a>
+                <button id="themeToggle" class="theme-toggle-button" title="Toggle theme">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </nav>
+            <div class="md:hidden flex items-center">
+                 <button id="themeToggleMobile" class="theme-toggle-button mr-2" title="Toggle theme">
+                    <i class="fas fa-sun"></i>
+                </button>
+                <button id="mobileMenuButton" class="text-xl p-2 focus:outline-none text-[var(--text-color)] hover:text-[var(--nav-link-hover-color)]">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
         </div>
-    </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-[var(--header-bg)] bg-opacity-98 border-t border-[var(--footer-border)]">
+            <a href="#home" class="nav-link block py-3 px-4 text-sm">Home</a>
+            <a href="#about" class="nav-link block py-3 px-4 text-sm">About</a>
+            <a href="#skills" class="nav-link block py-3 px-4 text-sm">Skills</a>
+            <a href="#tech" class="nav-link block py-3 px-4 text-sm">Tech Showcase</a>
+            <a href="#contact" class="nav-link block py-3 px-4 text-sm">Contact</a>
+        </div>
+    </header>
 
-<script>
-    // --- Constants ---
-    const MAX_HISTORY_ITEMS = 10;
-    const ART_STYLES = ["Photorealistic", "Impressionistic", "Surrealist", "Cyberpunk", "Steampunk", "Fantasy Art", "Abstract", "Minimalist", "Pop Art", "Anime/Manga", "Pixel Art", "Watercolor", "Oil Painting", "Charcoal Sketch", "Synthwave"];
-    const ASPECT_RATIOS = ['1:1', '16:9', '9:16', '4:3', '3:4'];
+    <section id="home" class="min-h-screen flex items-center justify-center text-center relative overflow-hidden pt-16 pb-8">
+        <div class="z-10 p-4 md:p-6">
+            <div id="heroTitleContainer">
+                <h1 id="heroTitle" class="text-4xl xxs:text-5xl xs:text-6xl sm:text-7xl md:text-8xl font-orbitron font-bold mb-5 leading-tight">
+                    </h1>
+            </div>
+            <p class="text-lg md:text-xl lg:text-2xl mb-8 text-[var(--text-color)] opacity-85 animate-fadeInUp" style="animation-delay: 1.3s;">Creative Developer & Tech Enthusiast</p>
+            <div class="space-x-3 sm:space-x-5 mb-8 animate-fadeInUp" style="animation-delay: 1.8s;">
+                <a href="https://github.com/115590" target="_blank" class="social-icon text-2xl sm:text-3xl"><i class="fab fa-github"></i></a>
+                <a href="https://twitter.com/akramkhan300" target="_blank" class="social-icon text-2xl sm:text-3xl"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=100076276897630" target="_blank" class="social-icon text-2xl sm:text-3xl"><i class="fab fa-facebook"></i></a>
+            </div>
+            <a href="#about" class="btn-discover btn-neon animate-fadeInUp text-sm sm:text-base" style="animation-delay: 2.3s;">Discover More <i class="fas fa-arrow-down ml-1.5"></i></a>
+        </div>
+        <style> 
+            @media (max-width: 360px) { #heroTitle { font-size: 2.8rem !important; } }
+            @media (max-width: 320px) { #heroTitle { font-size: 2.4rem !important; } }
+            @keyframes fadeInUp { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+            .animate-fadeInUp { animation: fadeInUp 0.9s ease-out forwards; opacity:0; }
+        </style>
+    </section>
 
-    // --- DOM Elements ---
-    const promptInput = document.getElementById('prompt');
-    const negativePromptInput = document.getElementById('negative-prompt');
-    const artStyleSelect = document.getElementById('art-style-select');
-    const aspectRatioSelect = document.getElementById('aspect-ratio-select');
+    <section id="about" class="scroll-animate">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold text-center mb-10 section-title-primary animated-section-header">About Me</h2>
+            <div class="max-w-3xl mx-auto glass-card p-6 md:p-10 rounded-xl shadow-xl">
+                <p class="text-base md:text-lg lg:text-xl mb-5 leading-relaxed opacity-85">
+                    Hello! I'm Akram Khan, a passionate developer and technology enthusiast with a keen eye for design and a drive for innovation. I love exploring new technologies and crafting solutions that are both functional and visually appealing.
+                </p>
+                <p class="text-base md:text-lg lg:text-xl mb-5 leading-relaxed opacity-85">
+                    My journey in tech is fueled by curiosity and a commitment to continuous learning. I thrive in collaborative environments and enjoy tackling complex challenges.
+                </p>
+                <p class="text-base md:text-lg lg:text-xl leading-relaxed opacity-85">
+                    When I'm not coding, you can find me exploring the latest tech trends, contributing to open-source projects, or brainstorming new ideas.
+                </p>
+            </div>
+        </div>
+    </section>
     
-    const themeToggleButton = document.getElementById('theme-toggle-button');
-    const themeIconSun = document.getElementById('theme-icon-sun');
-    const themeIconMoon = document.getElementById('theme-icon-moon');
+    <section id="skills" class="scroll-animate">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold text-center mb-12 section-title-secondary animated-section-header">Skills & Technologies</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 md:gap-6">
+                <div class="skill-card interactive-card"> <i class="fab fa-html5 skill-icon"></i> <p class="skill-name">HTML5</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-css3-alt skill-icon"></i> <p class="skill-name">CSS3</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-js-square skill-icon"></i> <p class="skill-name">JavaScript</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-java skill-icon"></i> <p class="skill-name">Java</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-python skill-icon"></i> <p class="skill-name">Python</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-react skill-icon"></i> <p class="skill-name">React</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-node-js skill-icon"></i> <p class="skill-name">Node.js</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-git-alt skill-icon"></i> <p class="skill-name">Git</p> </div>
+                <div class="skill-card interactive-card"> <i class="fas fa-database skill-icon"></i> <p class="skill-name">SQL</p> </div>
+                <div class="skill-card interactive-card"> <i class="fab fa-bootstrap skill-icon"></i> <p class="skill-name">Bootstrap</p> </div>
+            </div>
+        </div>
+    </section>
 
-    const enhanceStyleButton = document.getElementById('enhance-style-button');
-    const enhanceStyleButtonText = document.getElementById('enhance-style-button-text');
-    const enhanceStyleLoader = document.getElementById('enhance-style-loader');
-    const styleEnhanceError = document.getElementById('style-enhance-error');
+    <section id="tech" class="scroll-animate">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold text-center mb-12 section-title-primary animated-section-header">Tech Showcase</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="glass-card interactive-card p-5 rounded-xl shadow-xl neon-border">
+                    <img src="https://placehold.co/600x400/0c0c14/00e5ff?text=AI+Development" alt="AI Development Screenshot" class="rounded-lg mb-5 w-full h-44 object-cover" onerror="this.src='https://placehold.co/600x400/1f1f3a/e0e0e0?text=Image+Error'">
+                    <h3 class="text-xl font-semibold mb-2.5 neon-text-accent">AI & Machine Learning</h3>
+                    <p class="text-[var(--text-color)] text-sm opacity-75 mb-3">Exploring cutting-edge AI models, NLP, and computer vision projects.</p>
+                    <a href="#" class="nav-link-showcase text-xs font-semibold text-[var(--neon-primary)] hover:underline">View Details <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="glass-card interactive-card p-5 rounded-xl shadow-xl neon-border"> 
+                    <img src="https://placehold.co/600x400/0c0c14/ff00ff?text=Web+3.0+Platform" alt="Web 3.0 Screenshot" class="rounded-lg mb-5 w-full h-44 object-cover" onerror="this.src='https://placehold.co/600x400/1f1f3a/e0e0e0?text=Image+Error'">
+                    <h3 class="text-xl font-semibold mb-2.5 neon-text-accent">Web 3.0 & Blockchain</h3>
+                    <p class="text-[var(--text-color)] text-sm opacity-75 mb-3">Developing dApps and exploring blockchain technology's potential.</p>
+                     <a href="#" class="nav-link-showcase text-xs font-semibold text-[var(--neon-secondary)] hover:underline">View Details <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+                <div class="glass-card interactive-card p-5 rounded-xl shadow-xl neon-border">
+                    <img src="https://placehold.co/600x400/0c0c14/39ff14?text=Cloud+Solutions" alt="Cloud Solution Screenshot" class="rounded-lg mb-5 w-full h-44 object-cover" onerror="this.src='https://placehold.co/600x400/1f1f3a/e0e0e0?text=Image+Error'">
+                    <h3 class="text-xl font-semibold mb-2.5 neon-text-accent">Cloud & DevOps</h3>
+                    <p class="text-[var(--text-color)] text-sm opacity-75 mb-3">Building scalable apps using cloud platforms and DevOps practices.</p>
+                     <a href="#" class="nav-link-showcase text-xs font-semibold text-[var(--neon-primary)] hover:underline">View Details <i class="fas fa-arrow-right ml-1"></i></a>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    const suggestPromptsButton = document.getElementById('suggest-prompts-button');
-    const suggestPromptsButtonText = document.getElementById('suggest-prompts-button-text');
-    const suggestPromptsLoader = document.getElementById('suggest-prompts-loader');
-    const suggestionsContainer = document.getElementById('suggestions-container');
-    const closeSuggestionsButton = document.getElementById('close-suggestions-button');
-    const suggestionsError = document.getElementById('suggestions-error');
-    const suggestionsLoaderText = document.getElementById('suggestions-loader-text');
-    const suggestionsList = document.getElementById('suggestions-list');
-    const noSuggestionsText = document.getElementById('no-suggestions-text');
+    <section id="contact" class="scroll-animate">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl md:text-4xl lg:text-5xl font-orbitron font-bold mb-8 section-title-primary animated-section-header">Get In Touch</h2>
+            <p class="text-lg md:text-xl max-w-2xl mx-auto mb-10 text-[var(--text-color)] opacity-85">
+                Interested in collaborating or have a question? Feel free to reach out!
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-5 sm:space-y-0 sm:space-x-6">
+                <a href="mailto:akramlala300@gmail.com" class="contact-btn btn-neon text-sm sm:text-base">
+                    <i class="fas fa-envelope mr-1.5"></i> Email Me
+                </a>
+                <a href="https://wa.me/+923001881920" target="_blank" class="contact-btn btn-neon btn-whatsapp-custom text-sm sm:text-base">
+                    <i class="fab fa-whatsapp mr-1.5"></i> WhatsApp
+                </a>
+            </div>
+             <div class="mt-10 space-x-5">
+                <a href="https://github.com/115590" target="_blank" class="social-icon text-2xl"><i class="fab fa-github"></i></a>
+                <a href="https://twitter.com/akramkhan300" target="_blank" class="social-icon text-2xl"><i class="fab fa-twitter"></i></a>
+                <a href="https://www.facebook.com/profile.php?id=100076276897630" target="_blank" class="social-icon text-2xl"><i class="fab fa-facebook"></i></a>
+            </div>
+        </div>
+    </section>
 
-    const historySection = document.getElementById('history-section');
-    const historyItemsContainer = document.getElementById('history-items-container');
+    <footer class="py-6 text-center">
+        <p class="text-[var(--text-color)] text-sm opacity-75">&copy; <span id="currentYear"></span> Akram Khan. All Rights Reserved.</p>
+<a href="https://wa.me/+923001881920" target="_blank" class="contact-btn btn-neon btn-whatsapp-custom text-sm sm:text-base">
+                    <i class="fab fa-whatsapp mr-1.5"></i> WhatsApp
+</a>
+    </footer>
 
-    const toggleAdvancedOptionsButton = document.getElementById('toggle-advanced-options-button');
-    const advancedOptionsSection = document.getElementById('advanced-options-section');
+    <a href="https://wa.me/+923001881920" target="_blank" class="floating-whatsapp" aria-label="Chat on WhatsApp">
+        <i class="fab fa-whatsapp"></i>
+    </a>
 
-    const generateImageButton = document.getElementById('generate-image-button');
-    const generateImageButtonText = document.getElementById('generate-image-button-text');
-    const generateImageLoader = document.getElementById('generate-image-loader');
-    const regenerateImageButton = document.getElementById('regenerate-image-button');
-    
-    const mainErrorMessage = document.getElementById('main-error-message');
-    const mainErrorText = document.getElementById('main-error-text');
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const body = document.body;
+        const themeToggle = document.getElementById('themeToggle');
+        const themeToggleMobile = document.getElementById('themeToggleMobile');
+        const sunIconClass = 'fa-sun';
+        const moonIconClass = 'fa-moon';
+        const bgLinesContainer = document.querySelector('.bg-animated-lines');
+        let audioInitialized = false;
+        let clickSynth, hoverSynth;
 
-    const imageDisplayArea = document.getElementById('image-display-area');
-    const imagePlaceholder = document.getElementById('image-placeholder');
-    const imageLoadingPlaceholder = document.getElementById('image-loading-placeholder');
-    const generatedImageContainer = document.getElementById('generated-image-container');
-    const generatedImage = document.getElementById('generated-image');
-    const downloadImageButton = document.getElementById('download-image-button');
+        function initializeAudio() {
+            if (audioInitialized || typeof Tone === 'undefined') return;
+            Tone.start().then(() => { // Ensure Tone.start() is called and resolved
+                clickSynth = new Tone.Synth({
+                    oscillator: { type: 'sine' },
+                    envelope: { attack: 0.005, decay: 0.1, sustain: 0.05, release: 0.1 },
+                    volume: -20 
+                }).toDestination();
 
-    const generateDescriptionButton = document.getElementById('generate-description-button');
-    const generateDescriptionButtonText = document.getElementById('generate-description-button-text');
-    const generateDescriptionLoader = document.getElementById('generate-description-loader');
-    const descriptionError = document.getElementById('description-error');
-    const descriptionLoaderText = document.getElementById('description-loader-text');
-    const generatedDescriptionText = document.getElementById('generated-description-text');
-
-    const suggestTitlesButton = document.getElementById('suggest-titles-button');
-    const suggestTitlesButtonText = document.getElementById('suggest-titles-button-text');
-    const suggestTitlesLoader = document.getElementById('suggest-titles-loader');
-    const titlesContainer = document.getElementById('titles-container');
-    const titlesError = document.getElementById('titles-error');
-    const titlesLoaderText = document.getElementById('titles-loader-text');
-    const titlesList = document.getElementById('titles-list');
-    const noTitlesText = document.getElementById('no-titles-text');
-
-    // --- Application State (simulated) ---
-    let appState = {
-        prompt: '',
-        negativePrompt: '',
-        imageUrl: '',
-        isLoadingImage: false,
-        error: '',
-        showAdvanced: false,
-        aspectRatio: ASPECT_RATIOS[0],
-        darkMode: true,
-        history: [],
-        selectedHistoryTimestamp: null,
-        suggestedPrompts: [],
-        isLoadingSuggestions: false,
-        suggestionsError: '',
-        showSuggestions: false,
-        generatedDescription: '',
-        isLoadingDescription: false,
-        descriptionError: '',
-        originalPromptForDescription: '', // Stores the prompt used for the current image
-        creativeTitles: [],
-        isLoadingTitles: false,
-        titlesError: '',
-        showTitles: false,
-        selectedStyle: ART_STYLES[0],
-        isLoadingStyleEnhance: false,
-        styleEnhanceError: ''
-    };
-
-    // --- Helper Functions ---
-    function toTitleCase(str) {
-        if (!str) return '';
-        const result = str.replace(/([A-Z])/g, ' $1');
-        return result.charAt(0).toUpperCase() + result.slice(1);
-    }
-
-    function setElementVisibility(element, visible) {
-        if (visible) {
-            element.classList.remove('hidden');
-        } else {
-            element.classList.add('hidden');
+                hoverSynth = new Tone.Synth({
+                    oscillator: { type: 'triangle8' }, // Softer wave
+                    envelope: { attack: 0.01, decay: 0.05, sustain: 0.01, release: 0.08 },
+                    volume: -28 
+                }).toDestination();
+                audioInitialized = true;
+            }).catch(e => console.error("Tone.js start failed:", e));
         }
-    }
-
-    function setLoadingState(buttonTextEl, loaderEl, isLoading, loadingText, defaultText) {
-        buttonTextEl.textContent = isLoading ? loadingText : defaultText;
-        setElementVisibility(loaderEl, isLoading);
-        loaderEl.closest('button').disabled = isLoading;
-    }
-    
-    // --- Theme Management ---
-    function applyTheme() {
-        const root = document.documentElement;
-        if (appState.darkMode) {
-            root.classList.add('dark');
-            themeIconSun.style.display = 'inline-block';
-            themeIconMoon.style.display = 'none';
-        } else {
-            root.classList.remove('dark');
-            themeIconSun.style.display = 'none';
-            themeIconMoon.style.display = 'inline-block';
-        }
-        localStorage.setItem('theme', appState.darkMode ? 'dark' : 'light');
-    }
-
-    function toggleTheme() {
-        appState.darkMode = !appState.darkMode;
-        applyTheme();
-    }
-
-    // --- UI Update Functions ---
-    function updateUI() {
-        promptInput.value = appState.prompt;
-        negativePromptInput.value = appState.negativePrompt;
-        aspectRatioSelect.value = appState.aspectRatio;
-        artStyleSelect.value = appState.selectedStyle;
-
-        // Main error
-        setElementVisibility(mainErrorMessage, !!appState.error);
-        mainErrorText.textContent = appState.error;
-
-        // Image display
-        if (appState.isLoadingImage) {
-            setElementVisibility(imagePlaceholder, false);
-            setElementVisibility(generatedImageContainer, false);
-            setElementVisibility(imageLoadingPlaceholder, true);
-        } else if (appState.imageUrl) {
-            setElementVisibility(imagePlaceholder, false);
-            setElementVisibility(imageLoadingPlaceholder, false);
-            generatedImage.src = appState.imageUrl;
-            setElementVisibility(generatedImageContainer, true);
-        } else {
-            setElementVisibility(imageLoadingPlaceholder, false);
-            setElementVisibility(generatedImageContainer, false);
-            setElementVisibility(imagePlaceholder, true);
-        }
-        downloadImageButton.disabled = !appState.imageUrl;
-
-        // Advanced options
-        setElementVisibility(advancedOptionsSection, appState.showAdvanced);
-        toggleAdvancedOptionsButton.textContent = appState.showAdvanced ? 'Hide Advanced Options' : 'Show Advanced Options';
         
-        // Buttons disabled state
-        const commonDisabled = appState.isLoadingImage || appState.isLoadingSuggestions || appState.isLoadingStyleEnhance;
-        generateImageButton.disabled = commonDisabled || !appState.prompt.trim();
-        regenerateImageButton.disabled = commonDisabled || (!appState.prompt.trim() && !appState.originalPromptForDescription);
-        suggestPromptsButton.disabled = commonDisabled || !appState.prompt.trim();
-        enhanceStyleButton.disabled = commonDisabled || !appState.prompt.trim();
-        generateDescriptionButton.disabled = commonDisabled || !appState.imageUrl;
-        suggestTitlesButton.disabled = commonDisabled || !appState.imageUrl;
-
-
-        // Prompt Suggestions UI
-        setElementVisibility(suggestionsContainer, appState.showSuggestions);
-        setElementVisibility(suggestionsError, !!appState.suggestionsError);
-        suggestionsError.textContent = appState.suggestionsError;
-        setElementVisibility(suggestionsLoaderText, appState.isLoadingSuggestions && !appState.suggestionsError);
-        suggestionsList.innerHTML = '';
-        if (!appState.isLoadingSuggestions && appState.suggestedPrompts.length > 0) {
-            appState.suggestedPrompts.forEach(p => {
-                const li = document.createElement('li');
-                li.className = 'text-xs text-sky-600 dark:text-sky-300 hover:text-sky-500 dark:hover:text-sky-200 hover:bg-sky-100 dark:hover:bg-sky-500/20 p-1.5 rounded cursor-pointer transition-colors';
-                li.textContent = p;
-                li.onclick = () => {
-                    appState.prompt = p;
-                    appState.showSuggestions = false;
-                    updateUI();
-                };
-                suggestionsList.appendChild(li);
-            });
-            setElementVisibility(noSuggestionsText, false);
-        } else if (!appState.isLoadingSuggestions && !appState.suggestionsError) {
-             setElementVisibility(noSuggestionsText, true);
-        }
-
-
-        // Style Enhance UI
-        setElementVisibility(styleEnhanceError, !!appState.styleEnhanceError);
-        styleEnhanceError.textContent = appState.styleEnhanceError;
-
-        // Description UI
-        setElementVisibility(descriptionError, !!appState.descriptionError);
-        descriptionError.textContent = appState.descriptionError;
-        setElementVisibility(descriptionLoaderText, appState.isLoadingDescription && !appState.descriptionError);
-        setElementVisibility(generatedDescriptionText, !!appState.generatedDescription && !appState.isLoadingDescription);
-        generatedDescriptionText.textContent = appState.generatedDescription;
-        
-        // Titles UI
-        setElementVisibility(titlesContainer, appState.showTitles);
-        setElementVisibility(titlesError, !!appState.titlesError);
-        titlesError.textContent = appState.titlesError;
-        setElementVisibility(titlesLoaderText, appState.isLoadingTitles && !appState.titlesError);
-        titlesList.innerHTML = '';
-        if (!appState.isLoadingTitles && appState.creativeTitles.length > 0) {
-            appState.creativeTitles.forEach(title => {
-                const li = document.createElement('li');
-                li.className = 'text-xs text-teal-700 dark:text-teal-300 p-1 rounded';
-                li.textContent = title;
-                titlesList.appendChild(li);
-            });
-            setElementVisibility(noTitlesText, false);
-        } else if (!appState.isLoadingTitles && !appState.titlesError) {
-            setElementVisibility(noTitlesText, true);
-        }
-
-        // History UI
-        setElementVisibility(historySection, appState.history.length > 0);
-        historyItemsContainer.innerHTML = '';
-        appState.history.forEach(item => {
-            const div = document.createElement('div');
-            div.className = `flex-shrink-0 cursor-pointer rounded-md overflow-hidden border-2 transition-all hover:opacity-80 ${appState.selectedHistoryTimestamp === item.timestamp ? 'border-sky-500 shadow-md' : 'border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500'}`;
-            div.title = `Prompt: ${item.prompt.substring(0, 50)}...`;
-            div.onclick = () => loadFromHistory(item);
-            const img = document.createElement('img');
-            img.src = item.imageUrl;
-            img.alt = `Generated art for prompt: ${item.prompt.substring(0, 50)}...`;
-            img.className = 'h-16 w-16 object-cover';
-            div.appendChild(img);
-            historyItemsContainer.appendChild(div);
-        });
-    }
-
-
-    // --- API Call Functions ---
-    async function geminiApiCall(textPromptForLLM) {
-        const apiKey = "AIzaSyAeVkTJr3PsviE89uVXzBEM_HHn4FV1iIo"; // Canvas will inject this
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-        const payload = { contents: [{ role: "user", parts: [{ text: textPromptForLLM }] }] };
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Gemini API Error Data:', errorData);
-                throw new Error(errorData.error?.message || `Gemini API HTTP error! status: ${response.status}`);
+        function playClickSound() {
+            if (!audioInitialized) initializeAudio(); // Attempt to init if not already
+            if (clickSynth && Tone.context.state === 'running') {
+                clickSynth.triggerAttackRelease('C5', '16n', Tone.now());
             }
-            const result = await response.json();
-            if (result.candidates && result.candidates[0]?.content?.parts?.[0]?.text) {
-                return result.candidates[0].content.parts[0].text;
+        }
+
+        function playHoverSound() {
+            if (!audioInitialized) initializeAudio();
+            if (hoverSynth && Tone.context.state === 'running') {
+                hoverSynth.triggerAttackRelease('A#5', '32n', Tone.now() + 0.005);
+            }
+        }
+        
+        document.body.addEventListener('click', function firstInteractionHandler(event) {
+            if (event.target.closest('button, a, .interactive-card')) {
+                 if (!audioInitialized && typeof Tone !== 'undefined') initializeAudio();
+            }
+        }, { once: true });
+
+
+        const neonPrimaryColor = getComputedStyle(document.documentElement).getPropertyValue('--neon-primary').trim();
+        function hexToRgb(hex) { return `${parseInt(hex.slice(1,3),16)}, ${parseInt(hex.slice(3,5),16)}, ${parseInt(hex.slice(5,7),16)}`; }
+        if (neonPrimaryColor && neonPrimaryColor.startsWith('#')) {
+            document.documentElement.style.setProperty('--neon-primary-rgb', hexToRgb(neonPrimaryColor));
+        } else {
+            document.documentElement.style.setProperty('--neon-primary-rgb', '0, 229, 255');
+        }
+
+        function setIcon(isLight) {
+            const iconClass = isLight ? moonIconClass : sunIconClass;
+            if (themeToggle) themeToggle.querySelector('i').className = `fas ${iconClass}`;
+            if (themeToggleMobile) themeToggleMobile.querySelector('i').className = `fas ${iconClass}`;
+        }
+
+        function applyTheme(theme) {
+            if (theme === 'light') {
+                body.classList.add('light-theme'); body.classList.remove('dark-theme');
+                setIcon(true);
+                if (bgLinesContainer) bgLinesContainer.innerHTML = '';
             } else {
-                console.error('Unexpected Gemini API response structure:', result);
-                throw new Error('Failed to get valid response from Gemini API.');
+                body.classList.add('dark-theme'); body.classList.remove('light-theme');
+                setIcon(false);
+                createBgLines();
             }
-        } catch (err) {
-            console.error('Gemini API call failed:', err);
-            throw err;
         }
-    }
 
-    async function handleGenerateImage() {
-        appState.prompt = promptInput.value;
-        if (!appState.prompt.trim()) {
-            appState.error = 'Prompt cannot be empty.';
-            updateUI();
-            return;
+        function toggleThemeAndSound() {
+            playClickSound(); 
+            const newTheme = body.classList.contains('light-theme') ? 'dark' : 'light';
+            applyTheme(newTheme);
+            localStorage.setItem('portfolioTheme', newTheme);
         }
         
-        appState.isLoadingImage = true;
-        appState.error = '';
-        appState.imageUrl = '';
-        appState.generatedDescription = '';
-        appState.descriptionError = '';
-        appState.creativeTitles = [];
-        appState.titlesError = '';
-        appState.showTitles = false;
-        appState.originalPromptForDescription = appState.prompt;
-        appState.selectedHistoryTimestamp = null;
-        updateUI();
-        setLoadingState(generateImageButtonText, generateImageLoader, true, "Generating...", "Generate Image");
+        if (themeToggle) themeToggle.addEventListener('click', toggleThemeAndSound);
+        if (themeToggleMobile) themeToggleMobile.addEventListener('click', toggleThemeAndSound);
 
-        const apiKey = "AIzaSyBUtCcM5FAnYmAJjpKad6UEcZLObyLgjhs"; // Canvas will inject this
-        const payload = {
-            instances: [{ prompt: appState.prompt }],
-            parameters: {
-                sampleCount: 1,
-                aspectRatio: appState.aspectRatio,
-                negativePrompt: appState.negativePrompt || undefined,
-            }
-        };
+        const savedTheme = localStorage.getItem('portfolioTheme') || 'dark';
+        applyTheme(savedTheme);
 
-        try {
-            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+        const mobileMenuButton = document.getElementById('mobileMenuButton');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (mobileMenuButton && mobileMenu) {
+            mobileMenuButton.addEventListener('click', () => {
+                playClickSound();
+                mobileMenu.classList.toggle('hidden');
             });
+            mobileMenu.querySelectorAll('a.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    playClickSound();
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Imagen API Error Data:', errorData);
-                throw new Error(errorData.error?.message || `Imagen API HTTP error! status: ${response.status}`);
+        document.querySelectorAll('header nav a.nav-link, a.social-icon, button.contact-btn, a.btn-discover, a.nav-link-showcase').forEach(el => {
+            el.addEventListener('click', playClickSound);
+        });
+        document.querySelectorAll('.interactive-card').forEach(card => {
+            card.addEventListener('mouseenter', playHoverSound);
+        });
+
+
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetElement = document.querySelector(this.getAttribute('href'));
+                if (targetElement) targetElement.scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        const scrollElements = document.querySelectorAll('.scroll-animate');
+        const elementInView = (el, dividend = 1) => el.getBoundingClientRect().top <= (window.innerHeight || document.documentElement.clientHeight) / dividend;
+        const displayScrollElement = (element) => element.classList.add('animated');
+        const handleScrollAnimation = () => scrollElements.forEach(el => { if (elementInView(el, 1.1)) displayScrollElement(el); });
+        window.addEventListener('scroll', handleScrollAnimation);
+        handleScrollAnimation();
+
+        const currentYearSpan = document.getElementById('currentYear');
+        if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+
+        function createBgLines() {
+            if (!bgLinesContainer || body.classList.contains('light-theme')) return;
+            bgLinesContainer.innerHTML = '';
+            const numberOfLines = 22; 
+            for (let i = 0; i < numberOfLines; i++) {
+                const line = document.createElement('span');
+                line.style.left = `${Math.random() * 100}%`;
+                line.style.animationDelay = `${Math.random() * 30}s`; 
+                line.style.animationDuration = `${25 + Math.random() * 20}s`; 
+                line.style.height = `${35 + Math.random() * 80}px`; 
+                bgLinesContainer.appendChild(line);
             }
-            const result = await response.json();
+        }
+        if (body.classList.contains('dark-theme')) createBgLines();
 
-            if (result.predictions && result.predictions[0]?.bytesBase64Encoded) {
-                appState.imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-                const newHistoryItem = {
-                    prompt: appState.prompt,
-                    negativePrompt: appState.negativePrompt,
-                    aspectRatio: appState.aspectRatio,
-                    imageUrl: appState.imageUrl,
-                    timestamp: new Date().toISOString()
-                };
-                appState.history = [newHistoryItem, ...appState.history].slice(0, MAX_HISTORY_ITEMS);
-            } else if (result.predictions && result.predictions[0]?.error) {
-                console.error('Imagen Prediction Error:', result.predictions[0].error);
-                let detailedError = "Image generation failed.";
-                if (result.predictions[0].error.code === 8) {
-                    detailedError = "Image generation blocked due to safety policies. Please revise your prompt."
-                } else if (result.predictions[0].error.message) {
-                    detailedError = `Model error: ${result.predictions[0].error.message}`;
+        const heroTitleElement = document.getElementById('heroTitle');
+        if (heroTitleElement) {
+            const nameParts = [ {text: "AKRAM", class: "hero-name-primary"}, {text: "KHAN", class: "hero-name-secondary"} ];
+            let htmlContent = '';
+            let totalDelay = 0;
+            nameParts.forEach((partObj, partIndex) => {
+                htmlContent += `<span class="${partObj.class}">`;
+                partObj.text.split('').forEach((char, charIndex) => {
+                    htmlContent += `<span class="hero-title-char" style="animation-delay: ${totalDelay + 0.07 * charIndex}s">${char}</span>`;
+                });
+                htmlContent += `</span>`;
+                if (partIndex < nameParts.length - 1) {
+                    htmlContent += `<span class="hero-title-char" style="animation-delay: ${totalDelay + partObj.text.length * 0.07}s; display: inline-block; width: 0.5em;">&nbsp;</span>`; // Wider space for single line
+                    totalDelay += partObj.text.length * 0.07 + 0.1; 
+                } else {
+                     totalDelay += partObj.text.length * 0.07;
                 }
-                appState.error = detailedError;
-            } else {
-                console.error('Unexpected Imagen API response structure:', result);
-                appState.error = 'Failed to get image data from Imagen API response.';
-            }
-        } catch (err) {
-            console.error('Image generation failed:', err);
-            appState.error = err.message || 'An unexpected error occurred during image generation.';
-        } finally {
-            appState.isLoadingImage = false;
-            setLoadingState(generateImageButtonText, generateImageLoader, false, "Generating...", "Generate Image");
-            updateUI();
+            });
+            heroTitleElement.innerHTML = htmlContent;
         }
-    }
-
-    // --- Event Handlers ---
-    async function handleSuggestPrompts() {
-        appState.prompt = promptInput.value;
-        if (!appState.prompt.trim()) {
-            appState.suggestionsError = 'Please enter some keywords or an idea first.';
-            appState.showSuggestions = true;
-            appState.suggestedPrompts = [];
-            updateUI();
-            return;
-        }
-        appState.isLoadingSuggestions = true;
-        appState.suggestionsError = '';
-        appState.suggestedPrompts = [];
-        appState.showSuggestions = true;
-        updateUI();
-        setLoadingState(suggestPromptsButtonText, suggestPromptsLoader, true, "Suggesting...", "Suggest Prompts");
-
-        const metaPrompt = `Based on the following keywords/idea: "${appState.prompt}", generate 3 creative and detailed image generation prompts. Each prompt should be on a new line. Do not include numbering or bullet points, just the prompts.`;
-        try {
-            const suggestionsText = await geminiApiCall(metaPrompt);
-            appState.suggestedPrompts = suggestionsText.split('\n').filter(p => p.trim() !== '');
-        } catch (err) {
-            appState.suggestionsError = err.message || 'Failed to fetch prompt suggestions.';
-        } finally {
-            appState.isLoadingSuggestions = false;
-            setLoadingState(suggestPromptsButtonText, suggestPromptsLoader, false, "Suggesting...", "Suggest Prompts");
-            updateUI();
-        }
-    }
-
-    async function handleEnhancePromptWithStyle() {
-        appState.prompt = promptInput.value;
-        if (!appState.prompt.trim()) {
-            appState.styleEnhanceError = 'Please enter a prompt to enhance.';
-            updateUI();
-            return;
-        }
-        if (!appState.selectedStyle) {
-            appState.styleEnhanceError = 'Please select a style.';
-            updateUI();
-            return;
-        }
-        appState.isLoadingStyleEnhance = true;
-        appState.styleEnhanceError = '';
-        updateUI();
-        setLoadingState(enhanceStyleButtonText, enhanceStyleLoader, true, "Enhancing...", "Enhance Style");
-
-        const metaPrompt = `Rewrite the following image generation prompt to strongly incorporate the artistic style of "${appState.selectedStyle}". Only output the revised prompt.
-Original prompt: "${appState.prompt}"
-Style to incorporate: "${appState.selectedStyle}"
-Revised prompt:`;
-        try {
-            const enhancedPromptText = await geminiApiCall(metaPrompt);
-            appState.prompt = enhancedPromptText.trim();
-        } catch (err) {
-            appState.styleEnhanceError = err.message || 'Failed to enhance prompt with style.';
-        } finally {
-            appState.isLoadingStyleEnhance = false;
-            setLoadingState(enhanceStyleButtonText, enhanceStyleLoader, false, "Enhancing...", "Enhance Style");
-            updateUI();
-        }
-    }
-    
-    async function handleGenerateDescription() {
-        if (!appState.originalPromptForDescription) {
-            appState.descriptionError = 'No prompt available to generate description from.';
-            updateUI();
-            return;
-        }
-        appState.isLoadingDescription = true;
-        appState.descriptionError = '';
-        appState.generatedDescription = '';
-        updateUI();
-        setLoadingState(generateDescriptionButtonText, generateDescriptionLoader, true, "Generating...", "Generate Description");
-
-        const metaPrompt = `Write a short, imaginative description or a mini-story (2-3 sentences) inspired by an image that was generated from the following prompt: "${appState.originalPromptForDescription}".`;
-        try {
-            const descriptionText = await geminiApiCall(metaPrompt);
-            appState.generatedDescription = descriptionText;
-        } catch (err) {
-            appState.descriptionError = err.message || 'Failed to generate description.';
-        } finally {
-            appState.isLoadingDescription = false;
-            setLoadingState(generateDescriptionButtonText, generateDescriptionLoader, false, "Generating...", "Generate Description");
-            updateUI();
-        }
-    }
-
-    async function handleSuggestTitles() {
-        if (!appState.originalPromptForDescription) {
-            appState.titlesError = 'Generate an image first to suggest titles.';
-            appState.showTitles = true;
-            appState.creativeTitles = [];
-            updateUI();
-            return;
-        }
-        appState.isLoadingTitles = true;
-        appState.titlesError = '';
-        appState.creativeTitles = [];
-        appState.showTitles = true;
-        updateUI();
-        setLoadingState(suggestTitlesButtonText, suggestTitlesLoader, true, "Suggesting...", "Suggest Titles");
-
-        let contextForTitles = `Original prompt for the artwork: "${appState.originalPromptForDescription}"`;
-        if (appState.generatedDescription) {
-            contextForTitles += `\nGenerated description: "${appState.generatedDescription}"`;
-        }
-        const metaPrompt = `Based on the following information about an artwork, suggest 3-4 creative and concise titles. Each title should be on a new line. Do not include numbering or bullet points.
-${contextForTitles}
-Suggested titles:`;
-        try {
-            const titlesText = await geminiApiCall(metaPrompt);
-            appState.creativeTitles = titlesText.split('\n').filter(t => t.trim() !== '');
-        } catch (err) {
-            appState.titlesError = err.message || 'Failed to fetch titles.';
-        } finally {
-            appState.isLoadingTitles = false;
-            setLoadingState(suggestTitlesButtonText, suggestTitlesLoader, false, "Suggesting...", "Suggest Titles");
-            updateUI();
-        }
-    }
-
-    function handleDownloadImage() {
-        if (!appState.imageUrl) return;
-        const link = document.createElement('a');
-        link.href = appState.imageUrl;
-        const safePrompt = (appState.originalPromptForDescription || appState.prompt).replace(/[^a-z0-9]/gi, '_').toLowerCase().slice(0,30);
-        link.download = `ai_image_${safePrompt || 'generated'}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    }
-
-    function handleRegenerateImage() {
-        const promptToRegenerate = appState.originalPromptForDescription || appState.prompt;
-        if (promptToRegenerate) {
-            appState.prompt = promptToRegenerate;
-            // If negative prompt and aspect ratio were part of the original generation, 
-            // they are already in appState if loaded from history, or current values will be used.
-            handleGenerateImage();
-        } else {
-            appState.error = 'Cannot regenerate without a prompt.';
-            updateUI();
-        }
-    }
-
-    function loadFromHistory(item) {
-        appState.prompt = item.prompt;
-        appState.negativePrompt = item.negativePrompt || '';
-        appState.aspectRatio = item.aspectRatio;
-        appState.imageUrl = item.imageUrl;
-        appState.originalPromptForDescription = item.prompt;
-        appState.selectedHistoryTimestamp = item.timestamp;
-        appState.generatedDescription = '';
-        appState.creativeTitles = [];
-        appState.showTitles = false;
-        appState.descriptionError = '';
-        appState.titlesError = '';
-        appState.error = '';
-        updateUI();
-    }
-
-    // --- Initialization ---
-    function init() {
-        // Populate Art Styles Select
-        ART_STYLES.forEach(style => {
-            const option = document.createElement('option');
-            option.value = style;
-            option.textContent = style;
-            artStyleSelect.appendChild(option);
-        });
-        artStyleSelect.value = appState.selectedStyle;
-
-        // Populate Aspect Ratios Select
-        ASPECT_RATIOS.forEach(ratio => {
-            const option = document.createElement('option');
-            option.value = ratio;
-            option.textContent = toTitleCase(ratio);
-            aspectRatioSelect.appendChild(option);
-        });
-        aspectRatioSelect.value = appState.aspectRatio;
-
-        // Load theme from localStorage
-        const storedTheme = localStorage.getItem('theme');
-        if (storedTheme) {
-            appState.darkMode = storedTheme === 'dark';
-        } else {
-            appState.darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-        applyTheme(); // Apply initially
-
-        // Add event listeners
-        themeToggleButton.addEventListener('click', toggleTheme);
-        
-        promptInput.addEventListener('input', (e) => appState.prompt = e.target.value);
-        negativePromptInput.addEventListener('input', (e) => appState.negativePrompt = e.target.value);
-        artStyleSelect.addEventListener('change', (e) => appState.selectedStyle = e.target.value);
-        aspectRatioSelect.addEventListener('change', (e) => appState.aspectRatio = e.target.value);
-
-        enhanceStyleButton.addEventListener('click', handleEnhancePromptWithStyle);
-        suggestPromptsButton.addEventListener('click', handleSuggestPrompts);
-        closeSuggestionsButton.addEventListener('click', () => {
-            appState.showSuggestions = false;
-            updateUI();
-        });
-
-        toggleAdvancedOptionsButton.addEventListener('click', () => {
-            appState.showAdvanced = !appState.showAdvanced;
-            updateUI();
-        });
-
-        generateImageButton.addEventListener('click', handleGenerateImage);
-        regenerateImageButton.addEventListener('click', handleRegenerateImage);
-        downloadImageButton.addEventListener('click', handleDownloadImage);
-        generateDescriptionButton.addEventListener('click', handleGenerateDescription);
-        suggestTitlesButton.addEventListener('click', handleSuggestTitles);
-
-        // Initial UI render
-        updateUI();
-    }
-
-    // Run init when the DOM is fully loaded
-    document.addEventListener('DOMContentLoaded', init);
-
-</script>
+    });
+    </script>
 </body>
 </html>
+
